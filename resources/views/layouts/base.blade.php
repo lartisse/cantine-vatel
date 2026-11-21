@@ -9,7 +9,7 @@
     <link rel="icon" href="{{ asset('img/vatel_logo.png') }}">
     <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
     <link rel="stylesheet" href="{{ asset('css/app.css') }}?v=3">
-    <link rel="stylesheet" href="{{ asset('css/extra.css') }}?v=17">
+    <link rel="stylesheet" href="{{ asset('css/extra.css') }}?v=18">
     @stack('head')
 </head>
 <body class="no-demo">

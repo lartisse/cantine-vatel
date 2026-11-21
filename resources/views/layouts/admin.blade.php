@@ -21,6 +21,12 @@
         ['payments', 'super.payments', 'key', 'Moyens de paiement', 0], ['app-settings', 'super.settings', 'sparkles', 'Paramètres de l’application', 0],
         ['audit', 'super.audit', 'file', 'Journal d’audit', 0],
     ];
+    // Mobile / tablette : 4 raccourcis principaux en bas + « Plus » pour le reste du menu
+    $primary = ['dashboard' => 'Tableau', 'orders' => 'Commandes', 'counter' => 'Comptoir', 'alerts' => 'Alertes'];
+    $all = collect($links)->merge($u->isSuper() ? $sup : []);
+    $others = $all->reject(fn ($l) => isset($primary[$l[0]]));
+    $moreCount = $others->sum(fn ($l) => $l[4]);
+    $moreActive = $nav !== '' && ! isset($primary[$nav]);
 @endphp
 <div class="admin">
     <aside class="sidebar">
@@ -49,5 +55,41 @@
         @endif
         @yield('content')
     </main>
+
+    {{-- Barre d'onglets en bas (≤ 860 px) --}}
+    <nav class="admin-tabbar" aria-label="Navigation principale">
+        @foreach ($all->filter(fn ($l) => isset($primary[$l[0]])) as [$k, $route, $icon, $label, $count])
+            <a href="{{ route($route) }}" class="{{ $nav === $k ? 'active' : '' }}"><span class="ti">{!! ic($icon) !!}@if ($count)<i class="tab-badge">{{ $count }}</i>@endif</span>{{ $primary[$k] }}</a>
+        @endforeach
+        <button type="button" class="{{ $moreActive ? 'active' : '' }}" data-open="m-admin-more" aria-haspopup="dialog"><span class="ti">{!! ic('plus') !!}@if ($moreCount)<i class="tab-badge">{{ $moreCount }}</i>@endif</span>Plus</button>
+    </nav>
 </div>
+
+@push('modals')
+<div class="modal-bg sheet hidden" id="m-admin-more" role="dialog" aria-label="Menu">
+    <div class="modal">
+        <div class="sheet-grip"></div>
+        <div class="row between mb"><div class="row"><x-avatar :user="$u" style="width:36px;height:36px;font-size:13px" /><div><b>{{ $u->name }}</b><div class="xs muted">{{ $u->position }}</div></div></div><button type="button" class="btn sm ghost" data-close aria-label="Fermer">{!! ic('x') !!}</button></div>
+        <div class="cat-label" style="margin-top:0">Administration</div>
+        <div class="sheet-grid">
+            @foreach ($links as [$k, $route, $icon, $label, $count])
+                @continue(isset($primary[$k]))
+                <a href="{{ route($route) }}" class="{{ $nav === $k ? 'active' : '' }}"><span class="ti">{!! ic($icon) !!}@if ($count)<i class="tab-badge">{{ $count }}</i>@endif</span>{{ $label }}</a>
+            @endforeach
+        </div>
+        @if ($u->isSuper())
+            <div class="cat-label">Super admin</div>
+            <div class="sheet-grid">
+                @foreach ($sup as [$k, $route, $icon, $label, $count])
+                    <a href="{{ route($route) }}" class="{{ $nav === $k ? 'active' : '' }}"><span class="ti">{!! ic($icon) !!}@if ($count)<i class="tab-badge">{{ $count }}</i>@endif</span>{{ $label }}</a>
+                @endforeach
+            </div>
+        @endif
+        <div class="btn-pair mt">
+            <a class="btn ghost" href="{{ route('profile') }}">{!! ic('user') !!} Mon profil</a>
+            <form method="POST" action="{{ route('logout') }}">@csrf<button class="btn danger block">{!! ic('logout') !!} Se déconnecter</button></form>
+        </div>
+    </div>
+</div>
+@endpush
 @endsection

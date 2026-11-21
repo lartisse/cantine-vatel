@@ -158,3 +158,40 @@ a.day.active, a.day.active b { color: #fff; }
 @media (max-width: 860px) { .grid-2-eq, .grid-3 { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 380px) { .bars-h .bh { grid-template-columns: 64px 1fr 32px; } }
 @media (max-width: 860px) { .kiosk-body { align-content: start; } }
+/* ---------- Administration mobile : en-tête compact + barre d'onglets en bas + feuille « Plus » ---------- */
+.admin-tabbar { display: none; }
+@media (max-width: 860px) {
+  .sidebar { flex-direction: row; align-items: center; gap: 10px; padding: 10px 14px; position: sticky; top: 0; z-index: 30; }
+  .sidebar .brand { padding: 0; flex: 1; min-width: 0; font-size: 14px; }
+  .sidebar .brand img { height: 30px; }
+  .sidebar nav { display: none; }
+  .sidebar .me { display: flex; margin: 0; padding: 0; border: 0; gap: 6px; }
+  .sidebar .me > .grow, .sidebar .me > .avatar { display: none; }
+  .main { padding-bottom: 96px; }
+  .admin-tabbar {
+    display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+    background: #fff; border-top: 1px solid var(--line); padding: 6px 4px calc(8px + env(safe-area-inset-bottom));
+    box-shadow: 0 -4px 14px rgba(16, 24, 40, .06);
+  }
+  .admin-tabbar a, .admin-tabbar button {
+    display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0; border: 0; background: none;
+    color: var(--muted); font: inherit; font-size: 11px; font-weight: 600; cursor: pointer; text-decoration: none;
+  }
+  .admin-tabbar .ti { position: relative; font-size: 20px; line-height: 1; }
+  .admin-tabbar .ti svg.ic { width: 22px; height: 22px; }
+  .admin-tabbar .active { color: var(--ink); }
+  .admin-tabbar .active .ti { color: var(--blue); }
+}
+.tab-badge { position: absolute; top: -6px; right: -10px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--red); color: #fff; font-size: 10px; font-style: normal; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+/* Feuille « Plus » : remonte depuis le bas de l'écran */
+.modal-bg.sheet { align-items: flex-end; padding: 0; }
+.modal-bg.sheet .modal { max-width: 640px; border-radius: 20px 20px 0 0; padding: 10px 16px calc(16px + env(safe-area-inset-bottom)); max-height: 85vh; animation: sheet-up .22s ease; }
+.sheet-grip { width: 40px; height: 4px; border-radius: 2px; background: var(--line); margin: 0 auto 12px; }
+@keyframes sheet-up { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+.sheet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.sheet-grid a { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 6px; border-radius: 12px; background: var(--bg); color: var(--ink); font-size: 12px; font-weight: 600; text-align: center; text-decoration: none; line-height: 1.2; }
+.sheet-grid a .ti { position: relative; color: var(--blue); }
+.sheet-grid a .ti svg.ic { width: 22px; height: 22px; }
+.sheet-grid a.active { background: var(--sky-50); outline: 2px solid var(--sky); }
+.btn-pair form .btn { width: 100%; }
+@media (min-width: 861px) { #m-admin-more { display: none !important; } }
