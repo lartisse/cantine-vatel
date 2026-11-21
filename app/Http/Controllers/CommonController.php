@@ -8,6 +8,7 @@ use App\Services\ImageService;
 use App\Support\Settings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
@@ -105,7 +106,7 @@ class CommonController extends Controller
         $before = $request->file('photo')->getSize();
         $u->avatar_path = $images->store($request->file('photo'), 'avatars', 512, $u->avatar_path);
         $u->save();
-        $after = \Illuminate\Support\Facades\Storage::disk('public')->size($u->avatar_path);
+        $after = Storage::disk('public')->size($u->avatar_path);
 
         return back()->with('ok', __('Photo enregistrée').' ('.round($before / 1024).' Ko → '.round($after / 1024).' Ko)');
     }
@@ -157,6 +158,13 @@ class CommonController extends Controller
             return back()->withErrors(['password' => 'Mot de passe incorrect']);
         }
         $request->session()->put('auth.password_confirmed_at', now()->unix());
+        // Une action sensible (PUT/POST/DELETE) interrompue ne peut pas être rejouée en GET : retour à l'écran S5.
+        $intended = (string) $request->session()->get('url.intended', '');
+        if (preg_match('#/super/paiements/.+#', $intended)) {
+            $request->session()->forget('url.intended');
+
+            return redirect()->route('super.payments')->with('info', 'Identité confirmée : relancez l’action.');
+        }
 
         return redirect()->intended($request->user()->homeRoute());
     }

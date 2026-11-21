@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Menu;
 use App\Models\PaymentMethod;
 use App\Models\Reservation;
+use App\Models\Review;
 use App\Services\ReservationService;
 use App\Services\SuggestionService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 /** U4 Réserver, U5 Mes réservations + QR code. */
 class ReservationController extends Controller
@@ -54,7 +56,7 @@ class ReservationController extends Controller
     {
         $this->authorizeOwner($request, $reservation);
         $reservation->load('menu', 'items.dish');
-        $reviewed = \App\Models\Review::where('user_id', $request->user()->id)->where('menu_id', $reservation->menu_id)->exists();
+        $reviewed = Review::where('user_id', $request->user()->id)->where('menu_id', $reservation->menu_id)->exists();
 
         return view('user.reservation', ['r' => $reservation, 'reviewed' => $reviewed]);
     }
@@ -101,6 +103,6 @@ class ReservationController extends Controller
 
     protected function authorizeOwner(Request $request, Reservation $reservation): void
     {
-        abort_unless($reservation->user_id === $request->user()->id, 403);
+        Gate::authorize('update', $reservation);
     }
 }

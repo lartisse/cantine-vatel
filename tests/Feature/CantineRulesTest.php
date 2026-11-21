@@ -221,6 +221,13 @@ class CantineRulesTest extends TestCase
         $this->post('/parent/lier/verifier', ['code' => 'INE-5Q1'])->assertSessionHasErrors('code');
     }
 
+    public function test_un_utilisateur_ne_voit_pas_la_reservation_d_un_autre(): void
+    {
+        $yaoRes = Reservation::where('code', '204863')->firstOrFail();
+        $this->actingAs($this->user('awa.kone@vatel.ci'))->get('/reservations/'.$yaoRes->id)->assertForbidden();
+        $this->actingAs($this->user('yao.kone@vatel.ci'))->get('/reservations/'.$yaoRes->id)->assertOk()->assertSee('204863');
+    }
+
     public function test_toutes_les_pages_principales_repondent(): void
     {
         $pages = [
