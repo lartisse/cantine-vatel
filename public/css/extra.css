@@ -215,3 +215,11 @@ a.day.active, a.day.active b { color: #fff; }
 .store-btn.mine { background: var(--sky); color: var(--ink); border-color: var(--sky); }
 @media (max-width: 480px) { .store-btn { flex: 1 1 100%; } }
 .store-btn.mine:hover { color: var(--ink); }
+/* Ordinateur : le menu latéral garde le logo en haut et le profil en bas ; la liste des liens défile entre les deux */
+@media (min-width: 861px) {
+  .sidebar .brand, .sidebar .me { flex-shrink: 0; }
+  .sidebar nav { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; margin-right: -6px; padding-right: 6px; scrollbar-width: thin; scrollbar-color: #4a4a46 transparent; }
+  .sidebar nav::-webkit-scrollbar { width: 6px; }
+  .sidebar nav::-webkit-scrollbar-thumb { background: #4a4a46; border-radius: 3px; }
+  .sidebar .me { margin-top: 10px; }
+}

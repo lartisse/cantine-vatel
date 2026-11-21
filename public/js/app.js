@@ -216,6 +216,13 @@
   };
   $$('[data-carousel]').forEach(App.carousel);
 
+  // ---------- Menu latéral (administration) : le lien de la page ouverte reste visible ----------
+  const activeLink = document.querySelector('.sidebar nav a.active');
+  if (activeLink && activeLink.offsetParent) {
+    const nav = activeLink.closest('nav');
+    if (activeLink.offsetTop + activeLink.offsetHeight > nav.scrollTop + nav.clientHeight) nav.scrollTop = activeLink.offsetTop - nav.clientHeight / 2;
+  }
+
   // ---------- Service worker (PWA) ----------
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
     window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
