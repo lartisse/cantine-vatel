@@ -3,6 +3,8 @@
 Toutes les évolutions notables du projet. Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versions : [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
+### Ajouté
+- Classes de l'école gérées par le super admin (Paramètres de l'application) : ajout en lot, retrait, adoption des classes saisies par les élèves. L'élève choisit dans la liste ou saisit sa classe via « Autre » (orthographe officielle réutilisée si la classe existe déjà).
 ### Sécurité
 - Liaison parent : code de secours de 6 caractères aléatoires et limite de 5 essais par minute (le code à 3 caractères pouvait être deviné).
 - Comptes d'équipe : mot de passe provisoire affiché une fois, changement obligatoire à la première connexion, réinitialisation par le super admin ; commande `cantine:super-admin`.

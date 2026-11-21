@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Support\SchoolClasses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -26,7 +27,7 @@ class AuthController extends Controller
             'phone' => ['nullable', 'string', 'max:30'],
             'email' => ['required', 'email', 'max:120', 'unique:users,email'],
             'password' => ['required', Password::min(8)],
-            'class_name' => ['nullable', Rule::in(config('cantine.classes'))],
+            ...SchoolClasses::rules(),
             'matricule' => ['nullable', 'string', 'max:30'],
             'position' => ['nullable', 'string', 'max:80'],
             'allergies' => ['array'], 'allergies.*' => [Rule::in(array_keys(config('cantine.allergens')))],
@@ -34,14 +35,14 @@ class AuthController extends Controller
         ], [
             'first_name.required' => 'Le prénom est obligatoire.', 'last_name.required' => 'Le nom est obligatoire.',
             'email.unique' => 'Cet e-mail est déjà utilisé.', 'password.min' => 'Mot de passe trop court (8 caractères minimum).',
-        ]);
+        ] + SchoolClasses::messages());
 
         $user = new User;
         $user->fill([
             'first_name' => $data['first_name'], 'last_name' => $data['last_name'], 'phone' => $data['phone'] ?? null,
             'email' => strtolower($data['email']), 'password' => $data['password'], 'locale' => 'fr',
             'account_type' => $type === 'parent' ? null : $type,
-            'class_name' => $type === 'eleve' ? ($data['class_name'] ?? null) : null,
+            'class_name' => $type === 'eleve' ? SchoolClasses::resolve($data) : null,
             'matricule' => $type === 'eleve' ? ($data['matricule'] ?? null) : null,
             'position' => $type === 'personnel' ? ($data['position'] ?? null) : null,
             'allergies' => $type === 'parent' ? [] : ($data['allergies'] ?? []),

@@ -36,7 +36,7 @@
     <div class="field"><label>{{ __('Nom') }} *</label><input class="input" name="last_name" value="{{ old('last_name', $u->last_name) }}" required></div>
     <div class="field"><label>{{ __('Téléphone') }}</label><input class="input" name="phone" value="{{ old('phone', $u->phone) }}"></div>
     @if ($u->account_type === 'eleve')
-        <div class="field"><label>{{ __('Classe') }}</label><select class="input" name="class_name"><option value="">—</option>@foreach (config('cantine.classes') as $c)<option {{ $u->class_name === $c ? 'selected' : '' }}>{{ $c }}</option>@endforeach</select></div>
+        <div class="field"><label>{{ __('Classe') }}</label><x-class-select id="profile-class" :value="$u->class_name" /></div>
         <div class="field"><label>{{ __('Matricule') }}</label><input class="input" name="matricule" value="{{ old('matricule', $u->matricule) }}"></div>
     @elseif ($u->account_type === 'personnel')
         <div class="field"><label>{{ __('Poste') }}</label><input class="input" name="position" value="{{ old('position', $u->position) }}"></div>

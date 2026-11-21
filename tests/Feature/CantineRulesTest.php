@@ -270,6 +270,47 @@ class CantineRulesTest extends TestCase
         $this->assertTrue(AuditLog::where('details', 'like', 'SMTP%')->exists());
     }
 
+    public function test_classe_de_la_liste_ou_saisie_par_l_eleve(): void
+    {
+        // Classe absente de la liste : saisie libre
+        $this->post('/inscription', ['type' => 'eleve', 'first_name' => 'Kofi', 'last_name' => 'Test', 'email' => 'kofi@vatel.ci', 'password' => 'secret123',
+            'class_name' => \App\Support\SchoolClasses::OTHER, 'class_other' => '  BTS 1   Hôtellerie '])->assertRedirect('/accueil');
+        $this->assertSame('BTS 1 Hôtellerie', $this->user('kofi@vatel.ci')->class_name);
+
+        // Saisie d'une classe existante avec une autre casse : orthographe officielle réutilisée
+        $this->actingAs($this->user('awa.kone@vatel.ci'));
+        $this->put('/profil', ['first_name' => 'Awa', 'last_name' => 'Koné', 'class_name' => \App\Support\SchoolClasses::OTHER, 'class_other' => '6E b'])->assertSessionHasNoErrors();
+        $this->assertSame('6e B', $this->user('awa.kone@vatel.ci')->class_name);
+        // Classe hors liste envoyée sans passer par « Autre » : refusée ; « Autre » vide : refusé
+        $this->put('/profil', ['first_name' => 'Awa', 'last_name' => 'Koné', 'class_name' => 'Classe pirate'])->assertSessionHasErrors('class_name');
+        $this->put('/profil', ['first_name' => 'Awa', 'last_name' => 'Koné', 'class_name' => \App\Support\SchoolClasses::OTHER, 'class_other' => ''])->assertSessionHasErrors('class_other');
+        $this->put('/profil', ['first_name' => 'Awa', 'last_name' => 'Koné', 'class_name' => \App\Support\SchoolClasses::OTHER, 'class_other' => '<script>'])->assertSessionHasErrors('class_other');
+    }
+
+    public function test_le_super_admin_gere_les_classes(): void
+    {
+        $this->actingAs($this->user('gestion@cantine-vatel.ci'))->post('/super/parametres/classes', ['names' => 'BTS 2'])->assertForbidden();
+
+        $this->actingAs($this->user('superadmin@cantine-vatel.ci'));
+        $this->post('/super/parametres/classes', ['names' => "BTS 1 Hôtellerie, BTS 2\n3E A"])->assertSessionHasNoErrors();
+        Settings::flush();
+        $classes = \App\Support\SchoolClasses::all();
+        $this->assertContains('BTS 1 Hôtellerie', $classes);
+        $this->assertContains('BTS 2', $classes);
+        $this->assertSame(1, collect($classes)->filter(fn ($c) => mb_strtolower($c) === '3e a')->count()); // pas de doublon
+
+        $this->delete('/super/parametres/classes', ['name' => 'CM2'])->assertSessionHasNoErrors();
+        Settings::flush();
+        $this->assertNotContains('CM2', \App\Support\SchoolClasses::all());
+        $this->assertSame('CM2', $this->user('ines.kone@vatel.ci')->class_name); // les élèves gardent leur classe
+        $this->get('/super/parametres')->assertOk()->assertSee('Classes saisies par des élèves')->assertSee('CM2');
+
+        // La nouvelle classe est proposée à l'inscription
+        auth()->logout();
+        $this->get('/inscription')->assertSee('BTS 1 Hôtellerie')->assertDontSee('<option value="CM2"', false);
+        $this->assertTrue(AuditLog::where('details', 'like', 'Classes ajoutées%')->exists());
+    }
+
     public function test_toutes_les_pages_principales_repondent(): void
     {
         $pages = [

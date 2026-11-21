@@ -50,7 +50,7 @@ class DatabaseSeeder extends Seeder
         // ---------- Paramètres ----------
         foreach ([
             'cutoff' => config('cantine.cutoff'), 'trash_days' => config('cantine.trash_days'),
-            'slots' => config('cantine.slots'), 'forbidden_words' => config('cantine.forbidden_words'),
+            'slots' => config('cantine.slots'), 'classes' => config('cantine.classes'), 'forbidden_words' => config('cantine.forbidden_words'),
             'period' => ['id' => '2026-T2', 'label' => '2e trimestre 2026-2027'], 'default_threshold' => 1000,
             'refund_rule' => 'Remboursement intégral sur le solde avant l’heure limite',
         ] as $k => $v) {

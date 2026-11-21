@@ -26,7 +26,7 @@
     <div class="modal-bg hidden" id="m-class"><div class="modal">
         <h2>{{ __('Ma classe') }}</h2><p class="small muted mb">{{ $period['label'] }}</p>
         <form method="POST" action="{{ route('user.class') }}">@csrf<input type="hidden" name="action" value="save">
-            <div class="field"><label>{{ __('Classe') }}</label><select class="input" name="class_name"><option value="">{{ __('Je préfère ne pas l’indiquer') }}</option>@foreach (config('cantine.classes') as $c)<option {{ $u->class_name === $c ? 'selected' : '' }}>{{ $c }}</option>@endforeach</select></div>
+            <div class="field"><label>{{ __('Classe') }}</label><x-class-select id="home-class" :value="$u->class_name" :empty-label="__('Je préfère ne pas l’indiquer')" /></div>
             <div class="actions"><button type="button" class="btn ghost" data-close>{{ __('Annuler') }}</button><button class="btn">{{ __('Enregistrer') }}</button></div>
         </form>
     </div></div>

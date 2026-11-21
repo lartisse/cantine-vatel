@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Super;
 use App\Http\Controllers\Controller;
 use App\Services\AuditLogger;
 use App\Support\MailSettings;
+use App\Support\SchoolClasses;
 use App\Support\Settings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -15,7 +16,41 @@ class SettingsController extends Controller
 {
     public function index()
     {
-        return view('super.settings', ['interval' => Settings::suggestionInterval(), 'smtp' => MailSettings::get(), 'smtpPassword' => MailSettings::maskedPassword()]);
+        return view('super.settings', ['interval' => Settings::suggestionInterval(), 'smtp' => MailSettings::get(), 'smtpPassword' => MailSettings::maskedPassword(),
+            'classes' => SchoolClasses::all(), 'proposed' => SchoolClasses::proposed(),
+            'classCounts' => \App\Models\User::where('account_type', 'eleve')->whereNotNull('class_name')->where('status', '!=', 'trashed')->selectRaw('class_name, COUNT(*) as n')->groupBy('class_name')->pluck('n', 'class_name')->all()]);
+    }
+
+    /** Ajoute une ou plusieurs classes (séparées par des virgules ou des retours à la ligne). */
+    public function classAdd(Request $request)
+    {
+        $request->validate(['names' => ['required', 'string', 'max:2000']], ['names.required' => 'Saisissez au moins une classe.']);
+        $names = collect(preg_split('/[\n,;]+/', $request->input('names')))->map(fn ($n) => SchoolClasses::clean($n))->filter()->values();
+        $invalid = $names->first(fn ($n) => ! preg_match(SchoolClasses::PATTERN, $n));
+        if ($invalid !== null) {
+            return back()->withErrors(['names' => "« {$invalid} » : nom invalide (30 caractères max ; lettres, chiffres, espaces, . ' - °)."])->withInput();
+        }
+        $before = SchoolClasses::all();
+        $added = $names->reject(fn ($n) => SchoolClasses::match($n))->unique(fn ($n) => mb_strtolower($n))->values();
+        if ($added->isEmpty()) {
+            return back()->with('info', 'Ces classes existent déjà.');
+        }
+        SchoolClasses::save(array_merge($before, $added->all()));
+        AuditLogger::log('settings', 'Settings', 'Classes ajoutées : '.$added->join(', '), 'Classes de l’école');
+
+        return back()->with('ok', $added->count() === 1 ? 'Classe « '.$added->first().' » ajoutée' : $added->count().' classes ajoutées');
+    }
+
+    /** Retire une classe de la liste (les élèves déjà inscrits dans cette classe la conservent). */
+    public function classRemove(Request $request)
+    {
+        $data = $request->validate(['name' => ['required', 'string', 'max:40']]);
+        $official = SchoolClasses::match($data['name']);
+        abort_unless($official, 404);
+        SchoolClasses::save(array_values(array_filter(SchoolClasses::all(), fn ($c) => $c !== $official)));
+        AuditLogger::log('settings', 'Settings', 'Classe retirée : '.$official, 'Classes de l’école');
+
+        return back()->with('ok', 'Classe « '.$official.' » retirée de la liste');
     }
 
     /** Configuration SMTP : ressaisie du mot de passe du super admin, mot de passe SMTP chiffré, vide = conservé. */

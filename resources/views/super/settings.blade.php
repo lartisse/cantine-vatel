@@ -4,6 +4,7 @@
 @section('content')
 <div class="page-head"><div><h1>Paramètres de l’application</h1><p>Réglages réservés au super administrateur.</p></div></div>
 <div class="grid-2-eq">
+    <div>
     <form method="POST" action="{{ route('super.settings.update') }}" class="card">@csrf @method('PUT')
         <h3>{!! ic('sparkles') !!} Carrousel « Suggestions pour vous »</h3>
         <p class="small muted mt">Sur l’accueil des élèves et du personnel, les suggestions (un plat par catégorie) défilent automatiquement. Le défilement s’interrompt quand l’utilisateur touche, survole ou fait défiler le carrousel.</p>
@@ -14,6 +15,36 @@
         <div class="chips mb">@foreach ([3, 5, 8, 10] as $s)<button type="button" class="chip {{ (int) $interval === $s ? 'active' : '' }}" onclick="document.getElementById('interval').value={{ $s }}">{{ $s }} s</button>@endforeach</div>
         <button class="btn">Enregistrer</button>
     </form>
+
+    <div class="card mt" id="classes">
+        <div class="row between"><h3>{!! ic('graduation') !!} Classes de l’école</h3><span class="badge">{{ count($classes) }}</span></div>
+        <p class="small muted mt">Liste proposée aux élèves (inscription, profil, confirmation de classe). Un élève dont la classe n’y figure pas peut choisir « Autre » et la saisir. Retirer une classe ne modifie pas les élèves qui l’ont déjà.</p>
+        <div class="chips mt">
+            @forelse ($classes as $c)
+                <form method="POST" action="{{ route('super.settings.classes.remove') }}" class="inline" data-confirm="Retirer « {{ $c }} » de la liste ?" data-confirm-text="{{ ($classCounts[$c] ?? 0) ? ($classCounts[$c].' élève(s) la conservent sur leur profil.') : 'Aucun élève dans cette classe.' }}" data-confirm-ok="Retirer" data-danger>@csrf @method('DELETE')<input type="hidden" name="name" value="{{ $c }}">
+                    <span class="chip class-chip">{{ $c }}@if ($classCounts[$c] ?? 0)<span class="xs muted"> · {{ $classCounts[$c] }}</span>@endif<button class="class-x" title="Retirer {{ $c }}" aria-label="Retirer {{ $c }}">{!! ic('x') !!}</button></span>
+                </form>
+            @empty
+                <span class="small muted">Aucune classe : les élèves saisiront la leur.</span>
+            @endforelse
+        </div>
+        <form method="POST" action="{{ route('super.settings.classes.add') }}" class="mt">@csrf
+            <label class="small bold" for="new-classes">Ajouter des classes</label>
+            <div class="row mt" style="align-items:flex-start"><textarea class="input grow" id="new-classes" name="names" rows="2" placeholder="Ex. 2nde B, Tle D, BTS 1 Hôtellerie (séparées par des virgules ou une par ligne)">{{ old('names') }}</textarea><button class="btn">{!! ic('plus') !!} Ajouter</button></div>
+            @error('names')<span class="error">{{ $message }}</span>@enderror
+        </form>
+        @if ($proposed)
+            <div class="cat-label">Classes saisies par des élèves</div>
+            <p class="xs muted">Absentes de la liste officielle. Ajoutez-les pour les proposer aux autres élèves.</p>
+            <div class="stack mt">
+                @foreach ($proposed as $name => $n)
+                    <div class="row between"><span class="small"><b>{{ $name }}</b> <span class="muted">· {{ $n }} élève(s)</span></span>
+                        <form method="POST" action="{{ route('super.settings.classes.add') }}">@csrf<input type="hidden" name="names" value="{{ $name }}"><button class="btn sm light">{!! ic('plus') !!} Ajouter à la liste</button></form></div>
+                @endforeach
+            </div>
+        @endif
+    </div>
+    </div>
 
     <div>
         <form method="POST" action="{{ route('super.settings.smtp') }}" class="card" autocomplete="off" novalidate>@csrf @method('PUT')

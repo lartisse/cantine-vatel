@@ -7,6 +7,7 @@ use App\Models\Menu;
 use App\Models\Reservation;
 use App\Services\SuggestionService;
 use App\Support\Settings;
+use App\Support\SchoolClasses;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -36,9 +37,9 @@ class HomeController extends Controller
     {
         $u = $request->user();
         abort_unless($u->isStudent(), 403);
-        $data = $request->validate(['action' => ['required', Rule::in(['confirm', 'skip', 'save'])], 'class_name' => ['nullable', Rule::in(config('cantine.classes'))]]);
+        $data = $request->validate(['action' => ['required', Rule::in(['confirm', 'skip', 'save'])], ...SchoolClasses::rules()], SchoolClasses::messages());
         if ($data['action'] === 'save') {
-            $u->class_name = $data['class_name'] ?? null;
+            $u->class_name = SchoolClasses::resolve($data);
         }
         $u->class_confirmed_for = Settings::period()['id'];
         $u->save();

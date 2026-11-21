@@ -6,6 +6,7 @@ use App\Models\AppNotification;
 use App\Models\Menu;
 use App\Services\ImageService;
 use App\Support\Settings;
+use App\Support\SchoolClasses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -47,7 +48,7 @@ class CommonController extends Controller
             'first_name' => ['required', 'string', 'max:60'],
             'last_name' => ['required', 'string', 'max:60'],
             'phone' => ['nullable', 'string', 'max:30'],
-            'class_name' => ['nullable', Rule::in(config('cantine.classes'))],
+            ...SchoolClasses::rules(),
             'matricule' => ['nullable', 'string', 'max:30'],
             'position' => ['nullable', 'string', 'max:80'],
             'allergies' => ['array'], 'allergies.*' => [Rule::in(array_keys(config('cantine.allergens')))],
@@ -55,14 +56,14 @@ class CommonController extends Controller
             'low_balance_threshold' => ['nullable', 'integer', 'min:0', 'max:100000'],
             'locale' => ['nullable', Rule::in(['fr', 'en'])],
             'notify' => ['array'],
-        ], ['first_name.required' => 'Le prénom est obligatoire.', 'last_name.required' => 'Le nom est obligatoire.']);
+        ], ['first_name.required' => 'Le prénom est obligatoire.', 'last_name.required' => 'Le nom est obligatoire.'] + SchoolClasses::messages());
 
         $u->first_name = $data['first_name'];
         $u->last_name = $data['last_name'];
         $u->phone = $data['phone'] ?? null;
         if ($u->role === 'user') {
             if ($u->account_type === 'eleve') {
-                $u->class_name = $data['class_name'] ?? null;
+                $u->class_name = SchoolClasses::resolve($data);
                 $u->matricule = $data['matricule'] ?? null;
             } else {
                 $u->position = $data['position'] ?? null;

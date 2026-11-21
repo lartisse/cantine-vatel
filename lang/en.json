@@ -359,5 +359,8 @@
     "Suggestions pour vous": "Suggestions for you",
     "Réserver ces :n suggestions": "Book these :n suggestions",
     "Suggestion précédente": "Previous suggestion",
-    "Suggestion suivante": "Next suggestion"
+    "Suggestion suivante": "Next suggestion",
+    "Autre (saisir ma classe)…": "Other (type my class)…",
+    "Ex. 2nde B, BTS 1 Hôtellerie": "E.g. 10th grade B, Hospitality year 1",
+    "Votre classe n’est pas dans la liste ? Saisissez-la : la cantine pourra l’ajouter à la liste officielle.": "Your class is not listed? Type it: the canteen can add it to the official list."
 }

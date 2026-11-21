@@ -25,7 +25,7 @@
             <div class="field"><label>E-mail *</label><input class="input" type="email" name="email" value="{{ old('email') }}" required>@error('email')<span class="error">{{ $message }}</span>@enderror</div>
             <div class="field"><label>Mot de passe * <span class="muted xs">(8 caractères minimum)</span></label><input class="input" type="password" name="password" minlength="8" required>@error('password')<span class="error">{{ $message }}</span>@enderror</div>
             <div data-for="eleve">
-                <div class="field"><label>Classe <span class="muted xs">(facultatif)</span></label><select class="input" name="class_name"><option value="">—</option>@foreach (config('cantine.classes') as $c)<option {{ old('class_name') === $c ? 'selected' : '' }}>{{ $c }}</option>@endforeach</select></div>
+                <div class="field"><label>Classe <span class="muted xs">(facultatif)</span></label><x-class-select id="reg-class" /></div>
                 <div class="field"><label>Matricule <span class="muted xs">(facultatif)</span></label><input class="input" name="matricule" value="{{ old('matricule') }}"></div>
             </div>
             <div data-for="personnel"><div class="field"><label>Poste <span class="muted xs">(facultatif)</span></label><input class="input" name="position" value="{{ old('position') }}"></div></div>
