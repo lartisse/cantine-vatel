@@ -1,0 +1,30 @@
+# ---------------------------------------------------------------------------
+# Hébergement mutualisé (LWS…) : le domaine ou sous-domaine pointe sur la racine
+# du projet et ne peut pas être dirigé vers « public/ ». Ce fichier renvoie
+# toutes les requêtes vers public/ et interdit l'accès au reste du projet.
+# Ignoré sur un VPS dont la racine web est déjà « public/ » (Nginx ou Apache).
+# ---------------------------------------------------------------------------
+
+Options -Indexes -MultiViews
+
+# Sécurité : jamais d'accès direct aux fichiers sensibles, même si la réécriture est désactivée
+<FilesMatch "^(\.env.*|\.git.*|composer\.(json|lock)|package(-lock)?\.json|artisan|phpunit\.xml|vite\.config\.js|.*\.(md|log|sqlite|sh))$">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Transmettre l'en-tête Authorization (clés d'API « Bearer »)
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Forcer HTTPS (caméra du comptoir, mode hors ligne et cookies sécurisés l'exigent)
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # Tout le site est servi depuis public/
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>

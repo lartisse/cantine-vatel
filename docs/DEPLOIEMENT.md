@@ -151,3 +151,89 @@ php artisan serve                       # http://127.0.0.1:8000
 
 Les CSS et bibliothèques JS sont servis depuis `public/` : aucune connexion Internet n'est nécessaire pendant la démo. `npm run build` n'est utile que si l'on modifie `resources/css`.
 En dernier recours, la maquette `maquette/index.html` s'ouvre directement dans un navigateur.
+
+## 9. Hébergement mutualisé LWS (formule Starter) — `cantinevatel.lartisse.com`
+
+Sur LWS, le dossier d'un sous-domaine est fixe (`htdocs/cantinevatel.lartisse.com/`) et ne peut pas pointer vers `public/`. Le fichier **`.htaccess` à la racine du projet** (fourni dans le dépôt) renvoie donc tout le site vers `public/`, force le HTTPS et refuse l'accès direct aux fichiers sensibles (`.env`, `composer.json`, `artisan`…). La formule Starter inclut l'accès SSH (avec Composer et Git), le choix de la version PHP et les tâches cron.
+
+### 9.1 Dans le panneau LWS (une seule fois)
+
+1. **Sous-domaine** : créer `cantinevatel.lartisse.com` (son dossier `htdocs/cantinevatel.lartisse.com/` est créé automatiquement).
+2. **Certificat SSL** : l'activer pour `cantinevatel.lartisse.com` **avant** de déployer — le `.htaccess` redirige tout vers `https://` (sinon, commenter temporairement les 3 lignes « Forcer HTTPS »).
+3. **PHP** : *Bases de données & PHP › Configuration PHP* → **PHP 8.3 ou plus** pour ce sous-domaine ; vérifier `gd`, `intl`, `pdo_mysql`, `mbstring`, `fileinfo`, `zip` ; `upload_max_filesize` ≥ 6M, `post_max_size` ≥ 12M.
+4. **Base MySQL** : en créer une, noter hôte, nom, utilisateur, mot de passe.
+5. **SSH** : *Logiciels › Accès SSH* → ajouter sa clé publique, cocher « Activer », durée « Illimitée », « Authentification par clé uniquement ». Le panneau affiche l'hôte et l'identifiant.
+
+### 9.2 Premier déploiement (en SSH)
+
+```bash
+cd htdocs/cantinevatel.lartisse.com
+pwd                                   # notez ce chemin complet : il servira pour la tâche cron
+ls -la                                # le dossier doit être vide (supprimez la page par défaut de LWS s'il y en a une)
+git clone https://github.com/lartisse/cantine-vatel.git .
+cp .env.example .env
+nano .env                             # voir les valeurs ci-dessous
+bash scripts/deploy-lws.sh            # vérifie PHP, installe, migre la base, crée les caches
+php artisan cantine:super-admin direction@lartisse.com --prenom=Prénom --nom=Nom
+```
+
+Valeurs du `.env` à renseigner :
+
+```dotenv
+APP_NAME="Cantine de Vatel"
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://cantinevatel.lartisse.com
+APP_TIMEZONE=Africa/Abidjan
+
+DB_CONNECTION=mysql
+DB_HOST=…            # fourni par le panneau LWS
+DB_PORT=3306
+DB_DATABASE=…
+DB_USERNAME=…
+DB_PASSWORD=…
+
+SESSION_ENCRYPT=true
+SESSION_SECURE_COOKIE=true
+PAYMENT_ENV=test
+```
+
+`APP_KEY` est générée automatiquement par le script. Les e-mails (SMTP), les moyens de paiement, les liens de l'application mobile et les classes se règlent ensuite dans **Super admin › Paramètres de l'application** et **Moyens de paiement**.
+
+### 9.3 Tâche planifiée (purge de la corbeille)
+
+*Bases de données & PHP › Tâches cron* → nouvelle tâche **quotidienne à 00:00** (remplacer le chemin par celui affiché par `pwd`) :
+
+```bash
+php /chemin/affiché/par/pwd/artisan schedule:run
+```
+
+Une exécution par jour suffit : la seule tâche planifiée est la purge quotidienne. LWS limite une tâche à 240 s, ce qui est largement suffisant.
+
+### 9.4 Mettre à jour
+
+```bash
+cd htdocs/cantinevatel.lartisse.com && bash scripts/deploy-lws.sh
+```
+
+Le script fait `git pull`, `composer install --no-dev`, les migrations et recrée les caches.
+
+### 9.5 Instance de démonstration pour le jury (facultatif)
+
+Le seeder refuse de créer les comptes de démonstration (mot de passe `password`) en production. Pour une instance **réservée à la démo**, on peut le forcer, puis remettre la vraie configuration ensuite :
+
+```bash
+ALLOW_DEMO_SEED=true php artisan migrate:fresh --seed --force   # efface toute la base !
+```
+
+Ne laissez jamais ces comptes sur le site réel : supprimez-les ou relancez `php artisan migrate:fresh --force` puis `php artisan cantine:super-admin`.
+
+### 9.6 En cas de problème
+
+| Symptôme | Cause probable |
+| --- | --- |
+| Erreur 500 dès l'accueil | `.env` absent ou `APP_KEY` vide, droits d'écriture sur `storage/` ou `bootstrap/cache/` — voir `storage/logs/laravel.log` |
+| Page blanche ou liste des fichiers | Réécriture désactivée : vérifier que le `.htaccess` racine a bien été copié (`ls -la`) |
+| Boucle de redirection ou « site inaccessible » | Certificat SSL pas encore actif : l'activer, ou commenter les lignes « Forcer HTTPS » du `.htaccess` |
+| Photos non affichées | Lien `public/storage` absent : `php artisan storage:link` |
+| Caméra du comptoir refusée | Le site doit être ouvert en `https://` |
