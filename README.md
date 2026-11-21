@@ -1,6 +1,6 @@
 # Cantine de Vatel
 
-Application de gestion de cantine scolaire et d'entreprise, réalisée pour le hackathon **« Cantine de Vatel »** (Vatel Hotel & Tourism Business School, Abidjan, novembre 2026).
+Application de gestion de cantine scolaire et d'entreprise, réalisée pour le hackathon **« Cantine de Vatel »** (Vatel Hotel & Tourism Business School, Abidjan, Novembre 2026).
 
 Les élèves et le personnel consultent le menu, réservent leur repas depuis leur téléphone, paient avec leur solde ou par Mobile Money et récupèrent leur plateau en présentant un QR code. Les parents rechargent et suivent le compte de leurs enfants. L'administration sait chaque matin combien de repas préparer, gère ses stocks, modère les avis et est alertée des réservations à risque allergique.
 
