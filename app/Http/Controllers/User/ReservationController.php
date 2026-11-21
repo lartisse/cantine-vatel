@@ -35,7 +35,9 @@ class ReservationController extends Controller
         $already = $existing ? null : Reservation::where('user_id', $u->id)->where('menu_id', $menu->id)->where('status', '!=', 'cancelled')->first();
         $dishes = $menu->items->pluck('dish')->filter();
         SuggestionService::decorate($dishes);
-        $selected = $existing ? $existing->items->pluck('quantity', 'dish_id')->all() : array_filter([(int) $request->query('plat') => 1]);
+        // Présélection : un plat (?plat=4) ou plusieurs (?plats=1,4,12,16, depuis les suggestions)
+        $preset = array_filter(array_map('intval', explode(',', (string) $request->query('plats', $request->query('plat', '')))));
+        $selected = $existing ? $existing->items->pluck('quantity', 'dish_id')->all() : array_fill_keys($preset, 1);
 
         return view('user.book', [
             'u' => $u, 'menu' => $menu, 'existing' => $existing, 'already' => $already, 'selected' => $selected,

@@ -72,3 +72,11 @@ label.slot, label.pay-method, label.amount-btn, label.choice { cursor: pointer; 
 /* Jours du menu (liens) : texte lisible, blanc sur le jour sélectionné */
 a.day { color: var(--ink); text-decoration: none; }
 a.day.active, a.day.active b { color: #fff; }
+/* Suggestions : carrousel horizontal (un plat par catégorie) */
+.sugg-scroll { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 2px 2px 10px; margin: 0 -2px; -webkit-overflow-scrolling: touch; }
+.sugg-scroll::-webkit-scrollbar { height: 6px; }
+.sugg-scroll::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+.sugg-card { flex: 0 0 82%; max-width: 300px; scroll-snap-align: start; display: flex; flex-direction: column; background: #fff; }
+.sugg-card .btn { margin-top: auto; }
+@media (min-width: 900px) { .sugg-card { flex-basis: 260px; } }
+.sugg-card > .badge { align-self: flex-start; }

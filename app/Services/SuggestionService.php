@@ -12,37 +12,55 @@ use App\Models\User;
 /** Suggestions personnalisées par règles (historique, notes, allergies, régimes) + « Chef de la semaine ». */
 class SuggestionService
 {
+    /**
+     * Un plat suggéré par catégorie (entrée, plat, dessert, boisson) pour le prochain jour réservable :
+     * note moyenne + plats déjà appréciés + régime, en excluant les allergènes du profil et les plats épuisés.
+     *
+     * @return array{menu: Menu, items: array<string, array{dish: Dish, reason: string}>}|null
+     */
     public function forUser(User $u): ?array
     {
         $liked = ReservationItem::whereHas('reservation', fn ($q) => $q->where('user_id', $u->id)->where('status', 'served'))->pluck('dish_id')->unique()->all();
         $ratings = Review::where('status', 'visible')->whereNotNull('dish_id')->groupBy('dish_id')->selectRaw('dish_id, AVG(rating) as avg')->pluck('avg', 'dish_id');
-        $best = null;
         $menus = Menu::with('items.dish')->whereDate('date', '>=', today())->where('is_published', true)->orderBy('date')->limit(5)->get();
         $service = app(ReservationService::class);
+        $without = $u->allergyList() ? ' ('.__('sans').' '.implode(', ', array_map(fn ($a) => mb_strtolower(allergen_label($a)), $u->allergyList())).')' : '';
+
         foreach ($menus as $menu) {
             if (! $menu->isOpen() || Reservation::where('user_id', $u->id)->where('menu_id', $menu->id)->where('status', '!=', 'cancelled')->exists()) {
                 continue;
             }
             $left = $service->portionsLeft($menu);
+            $best = [];
             foreach ($menu->items as $item) {
                 $d = $item->dish;
-                if (! $d || $d->category !== 'plat' || $u->conflictsWith($d) || ($left[$d->id] ?? 0) <= 0) {
+                if (! $d || $u->conflictsWith($d) || ($left[$d->id] ?? 0) <= 0) {
                     continue;
                 }
                 $rating = (float) ($ratings[$d->id] ?? 3.5);
-                $score = $rating + (in_array($d->id, $liked, true) ? 0.6 : 0)
+                $wasLiked = in_array($d->id, $liked, true);
+                $score = $rating + ($wasLiked ? 0.6 : 0)
                     + (in_array('vegetarien', $u->diets ?? [], true) && in_array('vegetarien', $d->diets ?? [], true) ? 1 : 0)
                     - (array_diff($u->diets ?? [], $d->diets ?? []) ? 2 : 0);
-                if (! $best || $score > $best['score']) {
-                    $reason = (in_array($d->id, $liked, true) ? __('Vous l’avez déjà apprécié.').' ' : '')
-                        .__('Noté :r/5 et compatible avec votre profil', ['r' => number_format($rating, 1, ',', '')])
-                        .($u->allergyList() ? ' ('.__('sans').' '.implode(', ', array_map(fn ($a) => mb_strtolower(allergen_label($a)), $u->allergyList())).')' : '').'.';
-                    $best = ['dish' => $d, 'menu' => $menu, 'score' => $score, 'reason' => $reason];
+                if (! isset($best[$d->category]) || $score > $best[$d->category]['score']) {
+                    $reason = ($wasLiked ? __('Vous l’avez déjà apprécié.').' ' : '')
+                        .__('Noté :r/5 et compatible avec votre profil', ['r' => number_format($rating, 1, ',', '')]).$without.'.';
+                    $best[$d->category] = ['dish' => $d, 'score' => $score, 'reason' => $reason];
                 }
+            }
+            if ($best) {
+                $ordered = [];
+                foreach (['entree', 'plat', 'dessert', 'boisson'] as $c) {
+                    if (isset($best[$c])) {
+                        $ordered[$c] = $best[$c];
+                    }
+                }
+
+                return ['menu' => $menu, 'items' => $ordered];
             }
         }
 
-        return $best;
+        return null;
     }
 
     /** Classement « Chef de la semaine » : meilleure note moyenne des 7 derniers jours (3 avis minimum). */

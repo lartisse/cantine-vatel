@@ -82,9 +82,21 @@
 @endif
 
 @if ($suggestion)
-    <div class="section-title"><h3>{{ __('Suggestion pour vous') }}</h3><span class="badge">{!! ic('sparkles') !!} IA</span></div>
-    <div class="card flat"><div class="row"><x-dish-img :dish="$suggestion['dish']" size="md" /><div class="grow"><b>{{ $suggestion['dish']->name }}</b><div class="small muted">{{ $suggestion['menu']->label() }}</div><div class="xs mt">{{ $suggestion['reason'] }}</div></div></div>
-        <a class="btn light block mt" href="{{ route('reservations.create', [$suggestion['menu'], 'plat' => $suggestion['dish']->id]) }}">{{ __('Réserver ce plat') }}</a></div>
+    @php $sMenu = $suggestion['menu']; $sIds = collect($suggestion['items'])->map(fn ($s) => $s['dish']->id)->join(','); @endphp
+    <div class="section-title"><h3>{{ __('Suggestions pour vous') }}</h3><span class="small muted">{{ $sMenu->label() }}</span></div>
+    <div class="sugg-scroll" role="list">
+        @foreach ($suggestion['items'] as $cat => $s)
+            <div class="card flat sugg-card" role="listitem">
+                <span class="badge gray xs">{{ __(config('cantine.categories')[$cat]) }}</span>
+                <div class="row mt"><x-dish-img :dish="$s['dish']" size="md" /><div class="grow"><b>{{ $s['dish']->name }}</b><div class="small muted">{{ fcfa($s['dish']->price) }}</div></div></div>
+                <p class="xs mt grow">{{ $s['reason'] }}</p>
+                <a class="btn light block mt" href="{{ route('reservations.create', [$sMenu, 'plat' => $s['dish']->id]) }}">{{ __('Réserver ce plat') }}</a>
+            </div>
+        @endforeach
+    </div>
+    @if (count($suggestion['items']) > 1)
+        <a class="btn block mt" href="{{ route('reservations.create', [$sMenu, 'plats' => $sIds]) }}">{{ __('Réserver ces :n suggestions', ['n' => count($suggestion['items'])]) }}</a>
+    @endif
 @endif
 
 @if ($chefs->count())
