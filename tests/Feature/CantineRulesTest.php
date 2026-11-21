@@ -228,6 +228,17 @@ class CantineRulesTest extends TestCase
         $this->actingAs($this->user('yao.kone@vatel.ci'))->get('/reservations/'.$yaoRes->id)->assertOk()->assertSee('204863');
     }
 
+    public function test_delai_du_carrousel_regle_par_le_super_admin(): void
+    {
+        $this->actingAs($this->user('awa.kone@vatel.ci'))->get('/accueil')->assertOk()->assertSee('data-interval="5"', false);
+        $this->actingAs($this->user('gestion@cantine-vatel.ci'))->put('/super/parametres', ['suggestion_interval' => 3])->assertForbidden();
+        $this->actingAs($this->user('superadmin@cantine-vatel.ci'))->get('/super/parametres')->assertOk();
+        $this->put('/super/parametres', ['suggestion_interval' => 99])->assertSessionHasErrors('suggestion_interval');
+        $this->put('/super/parametres', ['suggestion_interval' => 3])->assertSessionHasNoErrors();
+        Settings::flush();
+        $this->actingAs($this->user('awa.kone@vatel.ci'))->get('/accueil')->assertSee('data-interval="3"', false);
+    }
+
     public function test_toutes_les_pages_principales_repondent(): void
     {
         $pages = [

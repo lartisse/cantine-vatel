@@ -18,7 +18,8 @@
     $sup = [
         ['admins', 'super.admins', 'shield', 'Administrateurs', 0], ['accounts', 'super.accounts', 'users', 'Comptes', 0],
         ['trash', 'super.trash', 'trash', 'Corbeille', 0], ['requests', 'super.requests', 'mail', 'Demandes de suppression', $pending],
-        ['payments', 'super.payments', 'key', 'Moyens de paiement', 0], ['audit', 'super.audit', 'file', 'Journal d’audit', 0],
+        ['payments', 'super.payments', 'key', 'Moyens de paiement', 0], ['app-settings', 'super.settings', 'sparkles', 'Paramètres de l’application', 0],
+        ['audit', 'super.audit', 'file', 'Journal d’audit', 0],
     ];
 @endphp
 <div class="admin">

@@ -9,7 +9,7 @@
     <link rel="icon" href="{{ asset('img/vatel_logo.png') }}">
     <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
     <link rel="stylesheet" href="{{ asset('css/app.css') }}?v=3">
-    <link rel="stylesheet" href="{{ asset('css/extra.css') }}?v=8">
+    <link rel="stylesheet" href="{{ asset('css/extra.css') }}?v=11">
     @stack('head')
 </head>
 <body class="no-demo">
@@ -23,7 +23,7 @@
     </div>
     @stack('modals')
     <script src="{{ asset('vendor/qrcode.min.js') }}"></script>
-    <script src="{{ asset('js/app.js') }}?v=3"></script>
+    <script src="{{ asset('js/app.js') }}?v=4"></script>
     @stack('scripts')
 </body>
 </html>

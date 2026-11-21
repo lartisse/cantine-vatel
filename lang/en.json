@@ -357,5 +357,7 @@
     "Pas de service aujourd’hui": "No service today",
     "Menu pas encore publié": "Menu not published yet",
     "Suggestions pour vous": "Suggestions for you",
-    "Réserver ces :n suggestions": "Book these :n suggestions"
+    "Réserver ces :n suggestions": "Book these :n suggestions",
+    "Suggestion précédente": "Previous suggestion",
+    "Suggestion suivante": "Next suggestion"
 }

@@ -84,15 +84,26 @@
 @if ($suggestion)
     @php $sMenu = $suggestion['menu']; $sIds = collect($suggestion['items'])->map(fn ($s) => $s['dish']->id)->join(','); @endphp
     <div class="section-title"><h3>{{ __('Suggestions pour vous') }}</h3><span class="small muted">{{ $sMenu->label() }}</span></div>
-    <div class="sugg-scroll" role="list">
+    <div class="sugg-carousel" data-carousel data-interval="{{ $interval }}" role="region" aria-roledescription="carrousel" aria-label="{{ __('Suggestions pour vous') }}">
+    <div class="sugg-scroll" data-track>
         @foreach ($suggestion['items'] as $cat => $s)
-            <div class="card flat sugg-card" role="listitem">
+            <div class="card flat sugg-card" data-slide role="group" aria-roledescription="diapositive" aria-label="{{ $loop->iteration }} / {{ count($suggestion['items']) }}">
                 <span class="badge gray xs">{{ __(config('cantine.categories')[$cat]) }}</span>
                 <div class="row mt"><x-dish-img :dish="$s['dish']" size="md" /><div class="grow"><b>{{ $s['dish']->name }}</b><div class="small muted">{{ fcfa($s['dish']->price) }}</div></div></div>
                 <p class="xs mt grow">{{ $s['reason'] }}</p>
                 <a class="btn light block mt" href="{{ route('reservations.create', [$sMenu, 'plat' => $s['dish']->id]) }}">{{ __('Réserver ce plat') }}</a>
             </div>
         @endforeach
+    </div>
+    @if (count($suggestion['items']) > 1)
+        <div class="sugg-nav">
+            <button type="button" class="sugg-arrow" data-prev aria-label="{{ __('Suggestion précédente') }}">{!! ic('chevron-left') !!}</button>
+            <div class="sugg-dots" data-dots>
+                @foreach ($suggestion['items'] as $cat => $s)<button type="button" aria-label="{{ __(config('cantine.categories')[$cat]) }}"><span></span></button>@endforeach
+            </div>
+            <button type="button" class="sugg-arrow" data-next aria-label="{{ __('Suggestion suivante') }}">{!! ic('chevron-right') !!}</button>
+        </div>
+    @endif
     </div>
     @if (count($suggestion['items']) > 1)
         <a class="btn block mt" href="{{ route('reservations.create', [$sMenu, 'plats' => $sIds]) }}">{{ __('Réserver ces :n suggestions', ['n' => count($suggestion['items'])]) }}</a>

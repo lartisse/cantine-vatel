@@ -83,6 +83,69 @@
   // ---------- Sauvegarde hors ligne des QR (localStorage) ----------
   App.saveOffline = (key, data) => { try { localStorage.setItem('cv:' + key, JSON.stringify(data)); } catch (e) { /* mode privé */ } };
 
+  // ---------- Carrousels : <div data-carousel data-interval="5"> [data-track] [data-slide] [data-prev] [data-next] [data-dots] ----------
+  // Défilement automatique toutes les N secondes (0 = désactivé), en boucle ; pause au survol, au toucher, au focus
+  // et quand l'onglet est masqué ; flèches, points cliquables et balayage tactile natif.
+  App.carousel = (root) => {
+    const track = root.querySelector('[data-track]');
+    const slides = Array.from(root.querySelectorAll('[data-slide]'));
+    const dots = Array.from(root.querySelectorAll('[data-dots] button'));
+    if (!track || slides.length < 2) return;
+    const delay = Math.max(0, +(root.dataset.interval || 0)) * 1000;
+    const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let timer = null, paused = false, resumeTimer = null;
+
+    const current = () => {
+      const x = track.scrollLeft;
+      let best = 0, dist = Infinity;
+      slides.forEach((s, i) => { const d = Math.abs(s.offsetLeft - slides[0].offsetLeft - x); if (d < dist) { dist = d; best = i; } });
+      return best;
+    };
+    const atEnd = () => track.scrollLeft >= track.scrollWidth - track.clientWidth - 4;
+    const go = (i) => {
+      const n = (i + slides.length) % slides.length;
+      track.scrollTo({ left: slides[n].offsetLeft - slides[0].offsetLeft, behavior: reduced ? 'auto' : 'smooth' });
+    };
+    const next = () => (atEnd() ? go(0) : go(current() + 1));
+    const prev = () => (track.scrollLeft <= 4 ? go(slides.length - 1) : go(current() - 1));
+    const paint = () => {
+      const i = atEnd() ? slides.length - 1 : current();
+      dots.forEach((d, k) => { d.classList.toggle('active', k === i); d.setAttribute('aria-current', k === i ? 'true' : 'false'); });
+    };
+    const restartProgress = () => {
+      const d = dots.find((x) => x.classList.contains('active'));
+      dots.forEach((x) => x.classList.remove('run'));
+      if (d && delay && !paused && !reduced) { void d.offsetWidth; d.classList.add('run'); }
+    };
+    const stop = () => { clearInterval(timer); timer = null; };
+    const start = () => {
+      stop();
+      if (!delay || reduced || paused) { restartProgress(); return; }
+      root.style.setProperty('--sugg-delay', delay + 'ms');
+      timer = setInterval(next, delay);
+      restartProgress();
+    };
+    const pause = () => { paused = true; clearTimeout(resumeTimer); stop(); root.classList.add('is-paused'); restartProgress(); };
+    const resume = (after = 0) => { clearTimeout(resumeTimer); resumeTimer = setTimeout(() => { paused = false; root.classList.remove('is-paused'); start(); }, after); };
+
+    root.querySelector('[data-next]')?.addEventListener('click', () => { next(); start(); });
+    root.querySelector('[data-prev]')?.addEventListener('click', () => { prev(); start(); });
+    dots.forEach((d, k) => d.addEventListener('click', () => { go(k); start(); }));
+    let raf = null;
+    track.addEventListener('scroll', () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { paint(); restartProgress(); }); }, { passive: true });
+    root.addEventListener('mouseenter', pause);
+    root.addEventListener('mouseleave', () => resume(0));
+    root.addEventListener('focusin', pause);
+    root.addEventListener('focusout', (e) => { if (!root.contains(e.relatedTarget)) resume(0); });
+    track.addEventListener('touchstart', pause, { passive: true });
+    track.addEventListener('touchend', () => resume(4000), { passive: true });
+    document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
+    root.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight') { e.preventDefault(); next(); } if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); } });
+    paint();
+    start();
+  };
+  $$('[data-carousel]').forEach(App.carousel);
+
   // ---------- Service worker (PWA) ----------
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
     window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));

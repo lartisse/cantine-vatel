@@ -1,7 +1,7 @@
 /* Ajustements propres à l'application Laravel (complètent css/app.css repris de la maquette) */
 body.no-demo #app { padding-top: 0; }
 body.no-demo .public-header { top: 0; }
-body.no-demo .sidebar { top: 0; height: 100vh; }
+@media (min-width: 861px) { body.no-demo .sidebar { top: 0; height: 100vh; } }
 body.no-demo .admin, body.no-demo .kiosk, body.no-demo .mobile-stage { min-height: 100vh; }
 
 /* ---------- Espaces élève / personnel / parent : plein écran responsive (sans cadre de téléphone) ---------- */
@@ -80,3 +80,33 @@ a.day.active, a.day.active b { color: #fff; }
 .sugg-card .btn { margin-top: auto; }
 @media (min-width: 900px) { .sugg-card { flex-basis: 260px; } }
 .sugg-card > .badge { align-self: flex-start; }
+/* Carrousel des suggestions : flèches, points avec barre de progression du défilement automatique */
+.sugg-carousel { position: relative; }
+.sugg-scroll { scroll-behavior: smooth; position: relative; scrollbar-width: none; }
+.sugg-scroll::-webkit-scrollbar { display: none; }
+.sugg-card { flex: 0 0 85%; max-width: none; transition: transform .2s ease, box-shadow .2s ease; }
+.sugg-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.sugg-nav { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 4px; }
+.sugg-arrow { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: #fff; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: var(--ink); }
+.sugg-arrow:hover { background: var(--sky-50); }
+.sugg-dots { display: flex; gap: 6px; }
+.sugg-dots button { width: 22px; height: 6px; padding: 0; border: 0; border-radius: 3px; background: var(--line); cursor: pointer; overflow: hidden; position: relative; }
+.sugg-dots button.active { width: 36px; background: var(--sky-100); }
+.sugg-dots button span { position: absolute; inset: 0; width: 0; background: var(--ink); border-radius: 3px; }
+.sugg-dots button.active span { width: 100%; }
+.sugg-dots button.active.run span { width: 0; animation: sugg-progress var(--sugg-delay, 5s) linear forwards; }
+@keyframes sugg-progress { from { width: 0; } to { width: 100%; } }
+@media (min-width: 900px) { .sugg-card { flex-basis: calc(50% - 6px); } }
+@media (min-width: 1300px) { .sugg-card { flex-basis: calc(33.333% - 8px); } }
+/* Administration sur mobile/tablette : menu horizontal défilant, profil et déconnexion accessibles */
+@media (max-width: 860px) {
+  .admin { grid-template-columns: minmax(0, 1fr); }
+  .sidebar { padding: 12px; min-width: 0; }
+  .sidebar .brand { padding-bottom: 10px; }
+  .sidebar nav .nav-sep { display: none; }
+  .sidebar .me { display: flex; margin-top: 10px; padding-top: 10px; }
+  .main { padding: 16px 16px 32px; }
+  .page-head { margin-bottom: 14px; }
+  .kpis { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 480px) { .kpis { grid-template-columns: 1fr; } .page-head h1 { font-size: 22px; } }

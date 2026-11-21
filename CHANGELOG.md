@@ -3,6 +3,9 @@
 Toutes les évolutions notables du projet. Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versions : [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
+### Ajouté
+- Suggestions : un plat par catégorie dans un carrousel interactif (flèches, points, balayage, clavier) à défilement automatique ; délai réglable par le super administrateur (5 s par défaut).
+- Espaces élève/personnel/parent en plein écran responsive ; administration utilisable sur mobile.
 ### Supprimé
 - Barre de démonstration (changement de rôle et d'heure), horloge figée, connexion en un clic, comptes affichés sur la page de connexion et bouton « Simuler un scan » du comptoir.
 ### Modifié

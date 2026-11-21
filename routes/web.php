@@ -148,6 +148,8 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('super')->name('super.')
         Route::post('/paiements/{method}/tester', [Super\PaymentController::class, 'test'])->name('payments.test');
         Route::post('/paiements/{method}/activer', [Super\PaymentController::class, 'toggle'])->name('payments.toggle');
     });
+    Route::get('/parametres', [Super\SettingsController::class, 'index'])->name('settings');
+    Route::put('/parametres', [Super\SettingsController::class, 'update'])->name('settings.update');
     Route::get('/audit', [Super\AuditController::class, 'index'])->name('audit');
     Route::get('/audit/export', [Super\AuditController::class, 'export'])->name('audit.export');
 });

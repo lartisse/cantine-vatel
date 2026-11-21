@@ -58,6 +58,12 @@ class Settings
         return static::json('period', ['id' => '2026-T2', 'label' => '2e trimestre 2026-2027']);
     }
 
+    /** Délai (secondes) du défilement automatique des suggestions ; 0 = désactivé. Par défaut : 5 s. */
+    public static function suggestionInterval(): int
+    {
+        return max(0, min(60, (int) static::get('suggestion_interval', 5)));
+    }
+
     public static function trashDays(): int
     {
         return (int) static::get('trash_days', config('cantine.trash_days'));
