@@ -64,6 +64,12 @@ class Settings
         return max(0, min(60, (int) static::get('suggestion_interval', 5)));
     }
 
+    /** Liens de téléchargement de l'application mobile (vides = bouton masqué). */
+    public static function appLinks(): array
+    {
+        return array_filter(['android' => static::get('app_android_url'), 'ios' => static::get('app_ios_url')]);
+    }
+
     public static function trashDays(): int
     {
         return (int) static::get('trash_days', config('cantine.trash_days'));

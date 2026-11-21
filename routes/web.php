@@ -158,6 +158,7 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('super')->name('super.')
     });
     Route::get('/parametres', [Super\SettingsController::class, 'index'])->name('settings');
     Route::put('/parametres', [Super\SettingsController::class, 'update'])->name('settings.update');
+    Route::put('/parametres/application', [Super\SettingsController::class, 'appLinks'])->name('settings.app');
     Route::post('/parametres/classes', [Super\SettingsController::class, 'classAdd'])->name('settings.classes.add');
     Route::delete('/parametres/classes', [Super\SettingsController::class, 'classRemove'])->name('settings.classes.remove');
     Route::put('/parametres/smtp', [Super\SettingsController::class, 'smtp'])->name('settings.smtp');

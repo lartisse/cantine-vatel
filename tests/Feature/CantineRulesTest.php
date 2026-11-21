@@ -311,6 +311,29 @@ class CantineRulesTest extends TestCase
         $this->assertTrue(AuditLog::where('details', 'like', 'Classes ajoutées%')->exists());
     }
 
+    public function test_liens_de_telechargement_de_l_application(): void
+    {
+        // Aucun lien configuré : pas de bouton
+        $this->get('/')->assertOk()->assertDontSee('Télécharger l’application');
+
+        $this->actingAs($this->user('gestion@cantine-vatel.ci'))->put('/super/parametres/application', ['android_url' => 'https://play.google.com/x'])->assertForbidden();
+
+        $this->actingAs($this->user('superadmin@cantine-vatel.ci'));
+        $this->put('/super/parametres/application', ['android_url' => 'javascript:alert(1)'])->assertSessionHasErrors('android_url');
+        $this->put('/super/parametres/application', ['ios_url' => 'http://apps.apple.com/app/x'])->assertSessionHasErrors('ios_url'); // https obligatoire
+        $this->put('/super/parametres/application', ['android_url' => 'https://play.google.com/store/apps/details?id=ci.vatel.cantine', 'ios_url' => ''])->assertSessionHasNoErrors();
+        Settings::flush();
+        auth()->logout();
+        $this->get('/')->assertSee('Télécharger l’application')->assertSee('https://play.google.com/store/apps/details?id=ci.vatel.cantine', false)
+            ->assertSee('data-os="android"', false)->assertDontSee('data-os="ios"', false);
+
+        $this->actingAs($this->user('superadmin@cantine-vatel.ci'))->put('/super/parametres/application', ['android_url' => 'https://play.google.com/store/apps/details?id=ci.vatel.cantine', 'ios_url' => 'https://apps.apple.com/app/id123'])->assertSessionHasNoErrors();
+        Settings::flush();
+        auth()->logout();
+        $this->get('/')->assertSee('data-os="ios"', false)->assertSee('https://apps.apple.com/app/id123', false);
+        $this->assertTrue(AuditLog::where('target_label', 'Liens de l’application mobile')->exists());
+    }
+
     public function test_toutes_les_pages_principales_repondent(): void
     {
         $pages = [

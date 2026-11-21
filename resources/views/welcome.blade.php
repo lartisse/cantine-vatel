@@ -11,6 +11,29 @@
             <a class="btn ghost" href="{{ route('login') }}">Se connecter</a>
             <a class="btn light" href="{{ route('menu.public') }}">Voir le menu de la semaine</a>
         </div>
+        @if ($appLinks)
+            <div class="app-download">
+                <p class="small bold">{!! ic('download') !!} Télécharger l’application</p>
+                <div class="row wrap mt">
+                    @if (! empty($appLinks['android']))
+                        <a class="store-btn" data-os="android" href="{{ $appLinks['android'] }}" target="_blank" rel="noopener noreferrer">{!! ic('smartphone') !!}<span><small>Télécharger pour</small><b>Android</b></span></a>
+                    @endif
+                    @if (! empty($appLinks['ios']))
+                        <a class="store-btn" data-os="ios" href="{{ $appLinks['ios'] }}" target="_blank" rel="noopener noreferrer">{!! ic('smartphone') !!}<span><small>Télécharger pour</small><b>iPhone / iPad</b></span></a>
+                    @endif
+                </div>
+            </div>
+            @push('scripts')
+            <script>
+            // Le bouton correspondant au téléphone du visiteur est mis en avant et placé en premier
+            (function () {
+              const ua = navigator.userAgent, os = /android/i.test(ua) ? 'android' : (/iphone|ipad|ipod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) ? 'ios' : null;
+              const btn = os && document.querySelector('.store-btn[data-os="' + os + '"]');
+              if (btn) { btn.classList.add('mine'); btn.parentNode.prepend(btn); }
+            })();
+            </script>
+            @endpush
+        @endif
     </div>
     <div class="hero-visual">
         <div class="row between mb"><b>{{ $menu ? 'Menu du '.mb_strtolower($menu->label()) : 'Menu à venir' }}</b>@if ($menu?->date->isToday())<span class="badge" style="background:var(--sky);color:var(--ink)">Aujourd’hui</span>@endif</div>

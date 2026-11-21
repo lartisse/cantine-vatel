@@ -22,7 +22,7 @@ class CommonController extends Controller
             ?? Menu::with('dishes')->whereDate('date', '>=', today())->where('is_published', true)->orderBy('date')->first();
         $items = $menu ? $menu->dishes->sortBy(fn ($d) => array_search($d->category, ['plat', 'entree', 'dessert', 'boisson']))->take(3) : collect();
 
-        return view('welcome', ['menu' => $menu, 'items' => $items, 'cutoff' => Settings::get('cutoff', '10:00')]);
+        return view('welcome', ['menu' => $menu, 'items' => $items, 'cutoff' => Settings::get('cutoff', '10:00'), 'appLinks' => Settings::appLinks()]);
     }
 
     public function publicMenu()

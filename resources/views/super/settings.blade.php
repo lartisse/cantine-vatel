@@ -16,6 +16,18 @@
         <button class="btn">Enregistrer</button>
     </form>
 
+    <form method="POST" action="{{ route('super.settings.app') }}" class="card mt" id="application">@csrf @method('PUT')
+        <div class="row between"><h3>{!! ic('download') !!} Application mobile</h3><span class="badge {{ $appLinks ? 'green' : 'gray' }}">{{ $appLinks ? 'Bouton affiché' : 'Bouton masqué' }}</span></div>
+        <p class="small muted mt">Liens des boutons « Télécharger l’application » de la page d’accueil. Laissez un champ vide pour masquer le bouton correspondant.</p>
+        <div class="field mt"><label for="app-android">Android (Google Play ou fichier APK)</label>
+            <input class="input" type="url" id="app-android" name="android_url" value="{{ old('android_url', $appLinks['android'] ?? '') }}" placeholder="https://play.google.com/store/apps/details?id=…" maxlength="500">
+            @error('android_url')<span class="error">{{ $message }}</span>@enderror</div>
+        <div class="field"><label for="app-ios">iPhone / iPad (App Store ou TestFlight)</label>
+            <input class="input" type="url" id="app-ios" name="ios_url" value="{{ old('ios_url', $appLinks['ios'] ?? '') }}" placeholder="https://apps.apple.com/app/…" maxlength="500">
+            @error('ios_url')<span class="error">{{ $message }}</span>@enderror</div>
+        <button class="btn">Enregistrer</button>
+    </form>
+
     <div class="card mt" id="classes">
         <div class="row between"><h3>{!! ic('graduation') !!} Classes de l’école</h3><span class="badge">{{ count($classes) }}</span></div>
         <p class="small muted mt">Liste proposée aux élèves (inscription, profil, confirmation de classe). Un élève dont la classe n’y figure pas peut choisir « Autre » et la saisir. Retirer une classe ne modifie pas les élèves qui l’ont déjà.</p>

@@ -3,6 +3,8 @@
 Toutes les évolutions notables du projet. Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versions : [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
+### Ajouté
+- Boutons « Télécharger l'application » (Android, iPhone/iPad) sur la page d'accueil, liens configurés par le super admin dans Paramètres de l'application ; le bouton du système du visiteur est mis en avant.
 ### Corrigé
 - Mode hors ligne : QR codes de toutes les réservations à venir enregistrés à chaque visite (et non plus seulement à l'ouverture du détail), QR périmés ou annulés retirés, pages jamais remplacées par une redirection vers la connexion, menu d'un autre jour servi depuis le cache, bandeau « hors ligne », effacement des QR et des pages personnelles à la déconnexion (téléphone partagé). Testé dans Chrome avec le serveur coupé.
 ### Ajouté

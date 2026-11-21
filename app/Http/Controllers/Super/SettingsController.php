@@ -17,8 +17,26 @@ class SettingsController extends Controller
     public function index()
     {
         return view('super.settings', ['interval' => Settings::suggestionInterval(), 'smtp' => MailSettings::get(), 'smtpPassword' => MailSettings::maskedPassword(),
-            'classes' => SchoolClasses::all(), 'proposed' => SchoolClasses::proposed(),
+            'classes' => SchoolClasses::all(), 'proposed' => SchoolClasses::proposed(), 'appLinks' => Settings::appLinks(),
             'classCounts' => \App\Models\User::where('account_type', 'eleve')->whereNotNull('class_name')->where('status', '!=', 'trashed')->selectRaw('class_name, COUNT(*) as n')->groupBy('class_name')->pluck('n', 'class_name')->all()]);
+    }
+
+    /** Liens de téléchargement de l'application mobile, affichés sur l'accueil (vide = bouton masqué). */
+    public function appLinks(Request $request)
+    {
+        $url = ['nullable', 'url:https', 'max:500'];
+        $data = $request->validate(['android_url' => $url, 'ios_url' => $url], [
+            'android_url.url' => 'Lien Android invalide : adresse complète en https:// attendue (Google Play ou fichier APK).',
+            'ios_url.url' => 'Lien iOS invalide : adresse complète en https:// attendue (App Store ou TestFlight).',
+        ]);
+        $old = Settings::appLinks();
+        Settings::set('app_android_url', $data['android_url'] ?? null);
+        Settings::set('app_ios_url', $data['ios_url'] ?? null);
+        $describe = fn ($v) => $v ?: 'aucun';
+        AuditLogger::log('settings', 'Settings', 'Android : '.$describe($data['android_url'] ?? null).' · iOS : '.$describe($data['ios_url'] ?? null)
+            .($old ? '' : ' (première configuration)'), 'Liens de l’application mobile');
+
+        return back()->with('ok', 'Liens de l’application enregistrés');
     }
 
     /** Ajoute une ou plusieurs classes (séparées par des virgules ou des retours à la ligne). */
