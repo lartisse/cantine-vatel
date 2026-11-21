@@ -30,6 +30,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications', [CommonController::class, 'notifications'])->name('notifications');
     Route::get('/notifications/{notification}', [CommonController::class, 'openNotification'])->name('notifications.open');
     Route::post('/notifications/tout-lire', [CommonController::class, 'readAll'])->name('notifications.readAll');
+    Route::get('/mot-de-passe/nouveau', [CommonController::class, 'showChangePassword'])->name('password.change');
+    Route::put('/mot-de-passe/nouveau', [CommonController::class, 'changePassword'])->middleware('throttle:6,1')->name('password.change.update');
     Route::get('/confirmer-mot-de-passe', [CommonController::class, 'showConfirm'])->name('password.confirm');
     Route::post('/confirmer-mot-de-passe', [CommonController::class, 'confirm'])->middleware('throttle:6,1');
 });
@@ -65,8 +67,9 @@ Route::middleware(['auth', 'role:parent'])->prefix('parent')->name('parent.')->g
     Route::get('/', [ParentArea\ParentController::class, 'home'])->name('home');
     Route::get('/enfants', [ParentArea\ParentController::class, 'children'])->name('children');
     Route::get('/lier', [ParentArea\ParentController::class, 'linkForm'])->name('link');
-    Route::post('/lier/verifier', [ParentArea\ParentController::class, 'linkFind'])->name('link.find');
-    Route::post('/lier', [ParentArea\ParentController::class, 'link'])->name('link.store');
+    // Limite d'essais : empêche de deviner un code de secours par essais successifs
+    Route::post('/lier/verifier', [ParentArea\ParentController::class, 'linkFind'])->middleware('throttle:5,1')->name('link.find');
+    Route::post('/lier', [ParentArea\ParentController::class, 'link'])->middleware('throttle:5,1')->name('link.store');
     Route::get('/enfants/{enfant}', [ParentArea\ParentController::class, 'child'])->name('child');
     Route::put('/enfants/{enfant}', [ParentArea\ParentController::class, 'updateChild'])->name('child.update');
     Route::post('/enfants/{enfant}/reserver', [ParentArea\ParentController::class, 'book'])->name('child.book');
@@ -76,6 +79,12 @@ Route::middleware(['auth', 'role:parent'])->prefix('parent')->name('parent.')->g
     Route::get('/paiements', [ParentArea\ParentController::class, 'payments'])->name('payments');
     Route::get('/alertes', [ParentArea\ParentController::class, 'alerts'])->name('alerts');
     Route::put('/alertes', [ParentArea\ParentController::class, 'saveAlerts'])->name('alerts.save');
+});
+
+// ---------- Comptoir (A11) : agents de comptoir, administrateurs et super administrateurs ----------
+Route::middleware(['auth', 'role:counter,admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/comptoir', [Admin\CounterController::class, 'index'])->name('counter');
+    Route::post('/comptoir', [Admin\CounterController::class, 'scan'])->middleware('throttle:60,1')->name('counter.scan');
 });
 
 // ---------- Administration (A1–A12) ----------
@@ -93,8 +102,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/commandes/{reservation}/servir', [Admin\OrderController::class, 'serve'])->name('orders.serve');
     Route::post('/commandes/cloturer', [Admin\OrderController::class, 'close'])->name('orders.close');
     Route::post('/commandes/anti-gaspi', [Admin\OrderController::class, 'antigaspi'])->name('orders.antigaspi');
-    Route::get('/comptoir', [Admin\CounterController::class, 'index'])->name('counter');
-    Route::post('/comptoir', [Admin\CounterController::class, 'scan'])->name('counter.scan');
     Route::get('/alertes', [Admin\AlertController::class, 'index'])->name('alerts');
     Route::post('/alertes/{reservation}/verifier', [Admin\AlertController::class, 'check'])->name('alerts.check');
     Route::post('/alertes/{reservation}/contacter', [Admin\AlertController::class, 'contact'])->name('alerts.contact');
@@ -132,6 +139,7 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('super')->name('super.')
     Route::post('/admins', [Super\AdminController::class, 'store'])->name('admins.store');
     Route::put('/admins/{user}', [Super\AdminController::class, 'update'])->name('admins.update');
     Route::post('/admins/{user}/statut', [Super\AdminController::class, 'toggle'])->name('admins.toggle');
+    Route::post('/admins/{user}/mot-de-passe', [Super\AdminController::class, 'resetPassword'])->name('admins.password');
     Route::get('/comptes', [Super\AccountController::class, 'index'])->name('accounts');
     Route::post('/comptes/{user}/corbeille', [Super\AccountController::class, 'trash'])->name('accounts.trash');
     Route::get('/corbeille', [Super\AccountController::class, 'trashIndex'])->name('trash');

@@ -14,8 +14,11 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
             \App\Http\Middleware\EnsureAccountActive::class,
+            \App\Http\Middleware\EnsurePasswordChanged::class,
             \App\Http\Middleware\SetLocale::class,
+            \App\Http\Middleware\SecurityHeaders::class,
         ]);
+        $middleware->api(append: [\App\Http\Middleware\SecurityHeaders::class]);
         $middleware->alias([
             'role' => \App\Http\Middleware\EnsureRole::class,
             'api.key' => \App\Http\Middleware\AuthenticateApiKey::class,

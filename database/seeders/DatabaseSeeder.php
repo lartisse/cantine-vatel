@@ -34,6 +34,13 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
+        // Sécurité : les comptes de démonstration (mot de passe « password ») ne doivent jamais exister en production
+        if (app()->isProduction() && ! env('ALLOW_DEMO_SEED')) {
+            $this->command?->error('Données de démonstration refusées en production (comptes au mot de passe connu). '
+                .'Créez le premier super administrateur avec : php artisan cantine:super-admin');
+
+            return;
+        }
         mt_srand(42);
         $today = Carbon::today();
         // Semaine de référence = semaine en cours (ou la suivante le week-end) : les données suivent la date réelle.
@@ -108,12 +115,12 @@ class DatabaseSeeder extends Seeder
         $kader = $mk(['role' => 'super_admin', 'first_name' => 'Kader', 'last_name' => 'Touré', 'email' => 'superadmin@cantine-vatel.ci', 'phone' => '07 00 11 22 33', 'position' => 'Super administrateur']);
         $jm = $mk(['role' => 'user', 'account_type' => 'personnel', 'first_name' => 'Jean-Marc', 'last_name' => 'Aka', 'email' => 'jm.aka@vatel.ci', 'phone' => '07 58 44 33 22',
             'position' => 'Professeur de mathématiques', 'balance' => 6000, 'allergies' => [], 'diets' => ['sans-porc']]);
-        $mk(['role' => 'admin', 'first_name' => 'Serge', 'last_name' => 'Kouadio', 'email' => 'comptoir1@cantine-vatel.ci', 'position' => 'Agent de comptoir']);
+        $mk(['role' => 'counter', 'first_name' => 'Serge', 'last_name' => 'Kouadio', 'email' => 'comptoir1@cantine-vatel.ci', 'position' => 'Agent de comptoir']);
         $ines = $mk(['role' => 'user', 'account_type' => 'eleve', 'first_name' => 'Inès', 'last_name' => 'Koné', 'email' => 'ines.kone@vatel.ci',
             'class_name' => 'CM2', 'matricule' => 'VAT-2402', 'balance' => 2000, 'allergies' => ['lactose'], 'diets' => [], 'class_confirmed_for' => '2026-T2']);
         $ibrahim->children()->attach([$awa->id => ['linked_at' => now()->subMonths(2)], $yao->id => ['linked_at' => now()->subMonths(2)]]);
-        LinkToken::create(['child_id' => $ines->id, 'token' => Str::random(40), 'code' => 'INE-5Q1', 'expires_at' => now()->addYear()]);
-        LinkToken::create(['child_id' => $awa->id, 'token' => Str::random(40), 'code' => 'AWA-7K2', 'expires_at' => now()->addMinutes(15)]);
+        LinkToken::create(['child_id' => $ines->id, 'token' => Str::random(40), 'code' => 'INE-7KQ2MX', 'expires_at' => now()->addYear()]);
+        LinkToken::create(['child_id' => $awa->id, 'token' => Str::random(40), 'code' => 'AWA-4HT8PZ', 'expires_at' => now()->addMinutes(15)]);
 
         // ---------- Autres convives ----------
         $firsts = ['Koffi', 'Aya', 'Moussa', 'Fatou', 'Jean', 'Mariam', 'Ismaël', 'Adjoua', 'Serge', 'Grâce', 'Ibrahim', 'Christelle', 'Yves', 'Aminata', 'Paul', 'Salimata', 'Kevin', 'Nadia', 'Hervé', 'Rokia', 'Arnaud', 'Esther', 'Bakary', 'Prisca', 'Didier', 'Awa', 'Lucien', 'Sandrine', 'Oumar', 'Laetitia'];

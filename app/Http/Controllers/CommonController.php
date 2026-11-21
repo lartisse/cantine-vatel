@@ -35,7 +35,7 @@ class CommonController extends Controller
     public function profile(Request $request)
     {
         $u = $request->user();
-        $view = $u->isAdmin() ? 'common.profile-admin' : 'common.profile';
+        $view = $u->isStaff() ? 'common.profile-admin' : 'common.profile';
 
         return view($view, ['u' => $u, 'pending' => $u->deletionRequests()->latest()->first()]);
     }
@@ -70,10 +70,10 @@ class CommonController extends Controller
             $u->allergies = $data['allergies'] ?? [];
             $u->diets = $data['diets'] ?? [];
             $u->low_balance_threshold = $data['low_balance_threshold'] ?? $u->low_balance_threshold;
-        } elseif ($u->isAdmin()) {
+        } elseif ($u->isStaff()) {
             $u->position = $data['position'] ?? $u->position;
         }
-        if (! $u->isAdmin()) {
+        if (! $u->isStaff()) {
             $u->locale = $data['locale'] ?? $u->locale;
             $u->notify = ['push' => isset($data['notify']['push']), 'sms' => isset($data['notify']['sms']), 'email' => isset($data['notify']['email'])];
         }
@@ -92,9 +92,10 @@ class CommonController extends Controller
 
     public function updatePassword(Request $request)
     {
-        $request->validate(['current_password' => ['required', 'current_password'], 'password' => ['required', 'confirmed', Password::min(8)]],
-            ['current_password.current_password' => 'Mot de passe incorrect']);
-        $request->user()->update(['password' => $request->input('password')]);
+        $request->validate(['current_password' => ['required', 'current_password'], 'password' => ['required', 'confirmed', Password::min(8), 'different:current_password']],
+            ['current_password.current_password' => 'Mot de passe incorrect', 'password.different' => 'Le nouveau mot de passe doit être différent de l’actuel.']);
+        $request->user()->forceFill(['password' => $request->input('password'), 'must_change_password' => false])->save();
+        $request->session()->regenerate();
 
         return back()->with('ok', __('Mot de passe modifié'));
     }
@@ -124,10 +125,13 @@ class CommonController extends Controller
     public function notifications(Request $request)
     {
         $u = $request->user();
-        $items = $u->appNotifications()->latest()->limit(60)->get();
+        if ($u->isCounter()) {
+            return redirect()->route('admin.counter');
+        }
         if ($u->isAdmin()) {
             return redirect()->route('admin.alerts');
         }
+        $items = $u->appNotifications()->latest()->limit(60)->get();
 
         return view('common.notifications', compact('items'));
     }
@@ -145,6 +149,29 @@ class CommonController extends Controller
         $request->user()->appNotifications()->whereNull('read_at')->update(['read_at' => now()]);
 
         return back();
+    }
+
+    /** Changement obligatoire d'un mot de passe provisoire (compte créé ou réinitialisé par le super admin). */
+    public function showChangePassword(Request $request)
+    {
+        return view('auth.change-password', ['forced' => (bool) $request->user()->must_change_password]);
+    }
+
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => ['required', 'current_password'],
+            'password' => ['required', 'confirmed', Password::min(10)->letters()->numbers(), 'different:current_password'],
+        ], [
+            'current_password.current_password' => 'Mot de passe provisoire incorrect',
+            'password.different' => 'Le nouveau mot de passe doit être différent du mot de passe provisoire.',
+            'password.min' => '10 caractères minimum.',
+        ]);
+        $u = $request->user();
+        $u->forceFill(['password' => $request->input('password'), 'must_change_password' => false])->save();
+        $request->session()->regenerate();
+
+        return redirect($u->homeRoute())->with('ok', 'Mot de passe enregistré');
     }
 
     public function showConfirm()

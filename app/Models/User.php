@@ -11,7 +11,7 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $guarded = ['id', 'role', 'balance', 'status'];
+    protected $guarded = ['id', 'role', 'balance', 'status', 'must_change_password'];
 
     protected $hidden = ['password', 'remember_token'];
 
@@ -23,11 +23,12 @@ class User extends Authenticatable
             'diets' => 'array',
             'notify' => 'array',
             'auto_topup' => 'boolean',
+            'must_change_password' => 'boolean',
             'trashed_at' => 'datetime',
         ];
     }
 
-    public const ROLE_LABELS = ['user' => 'Utilisateur', 'parent' => 'Parent', 'admin' => 'Administrateur', 'super_admin' => 'Super administrateur'];
+    public const ROLE_LABELS = ['user' => 'Utilisateur', 'parent' => 'Parent', 'counter' => 'Agent de comptoir', 'admin' => 'Administrateur', 'super_admin' => 'Super administrateur'];
 
     // ---------- Relations ----------
     public function children()
@@ -96,9 +97,16 @@ class User extends Authenticatable
         return $this->role === 'user' && $this->account_type === 'eleve';
     }
 
+    /** Agent de comptoir : rôle dédié, limité à l'écran Comptoir (principe du moindre privilège). */
     public function isCounter(): bool
     {
-        return $this->role === 'admin' && str_contains(mb_strtolower((string) $this->position), 'comptoir');
+        return $this->role === 'counter';
+    }
+
+    /** Membre de l'équipe de la cantine (comptoir, administrateur, super administrateur). */
+    public function isStaff(): bool
+    {
+        return in_array($this->role, ['counter', 'admin', 'super_admin'], true);
     }
 
     public function typeLabel(): string
@@ -147,7 +155,8 @@ class User extends Authenticatable
     {
         return match ($this->role) {
             'parent' => route('parent.home'),
-            'admin', 'super_admin' => $this->isCounter() ? route('admin.counter') : route('admin.dashboard'),
+            'counter' => route('admin.counter'),
+            'admin', 'super_admin' => route('admin.dashboard'),
             default => route('user.home'),
         };
     }

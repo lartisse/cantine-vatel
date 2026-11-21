@@ -58,7 +58,7 @@ php artisan serve                         # http://127.0.0.1:8000
 | Parent (de Awa et Yao) | i.kone@gmail.com |
 | Administrateur | gestion@cantine-vatel.ci |
 | Super administrateur | superadmin@cantine-vatel.ci |
-| Comptoir (administrateur, écran A11) | comptoir1@cantine-vatel.ci |
+| Agent de comptoir (écran A11 uniquement) | comptoir1@cantine-vatel.ci |
 
 **Heure** : l'application utilise l'heure réelle, fuseau `Africa/Abidjan` (`APP_TIMEZONE`). L'heure limite (10h00 par défaut) et le créneau en cours au comptoir sont calculés côté serveur, pour que personne ne puisse contourner la règle en changeant l'heure de son téléphone. Les données de démonstration suivent la date du jour : `migrate:fresh --seed` génère l'historique des semaines passées, des réservations pour le prochain jour de service et le menu de la semaine (ou de la semaine suivante le week-end).
 
@@ -148,7 +148,7 @@ Chaque groupe de routes est protégé par le middleware `role:`. Un administrate
 3. **Élève** : « Modifier » la réservation et ajouter le riz sauce arachide → modale « Plat incompatible » → confirmer. **Admin › Alertes** : l'alerte est arrivée ; contacter le parent, marquer comme vérifié (audit).
 4. **Comptoir** (compte comptoir1) : scanner le QR code avec la caméra ou saisir le code de secours → **Validé** (ou « Mauvais créneau » avec « Servir quand même »), alerte allergie affichée.
 5. **Admin › Tableau de bord / Commandes** : repas servi, prévision « préparez Y », impact anti-gaspi.
-6. **Parent** : alerte de solde bas de Yao, recharge Wave simulée ; « Ajouter un enfant » avec le code `INE-5Q1`.
+6. **Parent** : alerte de solde bas de Yao, recharge Wave simulée ; « Ajouter un enfant » avec le code `INE-7KQ2MX`.
 7. **Élève** : noter le repas de lundi. **Admin › Avis** : les avis contenant des mots interdits sont signalés.
 8. **Super admin › Moyens de paiement** : ressaisie du mot de passe, clés masquées, test de connexion ; corbeille ; journal d'audit.
 
@@ -212,10 +212,15 @@ Voir [Démarrage rapide](#1-démarrage-rapide) et, pour un serveur, [`docs/DEPLO
 | --- | --- |
 | Contrôle d'accès | Middleware `role:` sur chaque groupe ; `ReservationPolicy` ; vérification d'appartenance enfant/parent ; 403 pour un admin sur `/super/*` |
 | Comptes désactivés | `EnsureAccountActive` : déconnexion à la requête suivante, sessions supprimées à la mise en corbeille |
+| Moindre privilège | Rôle « Agent de comptoir » limité à l'écran Comptoir (403 ailleurs) ; changement de rôle = reconnexion obligatoire |
+| Comptes d'équipe | Mot de passe provisoire fort affiché une seule fois au super admin, changement obligatoire à la première connexion (`EnsurePasswordChanged`), réinitialisation possible ; premier super admin créé par `php artisan cantine:super-admin` |
+| Liaison parent | Jeton QR de 40 caractères ; code de secours de 6 caractères aléatoires (≈ 887 millions de combinaisons), 15 min, usage unique, 5 essais par minute |
 | Fichiers | Navigateur (type, 5 Mo) + serveur (`mimes:jpg,jpeg,png,webp`, `max:5120`, type réel via `getimagesize`, ré-encodage WebP) |
 | Clés API | `Crypt::encryptString` (AES-256, `APP_KEY`), `last4` seulement, jamais renvoyées au navigateur, détection d'une clé de test en Production |
 | Actions sensibles | Ressaisie du mot de passe (5 min) avant S5 ; suppression définitive après saisie du nom ou du mot de passe |
-| Traçabilité | `audit_logs` en ajout seul (le modèle interdit modification et suppression) |
+| Traçabilité | `audit_logs` en ajout seul : le modèle **et des déclencheurs en base** (SQLite et MySQL) interdisent modification et suppression |
+| En-têtes HTTP | `Content-Security-Policy` (aucune source externe), `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` (caméra limitée au site), HSTS en HTTPS |
+| Production | Liens forcés en HTTPS, cookies de session sécurisés et chiffrés, mots de passe ≥ 10 caractères non présents dans les fuites connues, seeder de démonstration refusé (`APP_ENV=production`) |
 | Formulaires | CSRF, mots de passe hachés (bcrypt), session régénérée à la connexion, limitation des tentatives de connexion |
 | Données personnelles | Suppression en 2 phases, anonymisation, purge planifiée |
 

@@ -3,6 +3,13 @@
 Toutes les évolutions notables du projet. Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versions : [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
+### Sécurité
+- Liaison parent : code de secours de 6 caractères aléatoires et limite de 5 essais par minute (le code à 3 caractères pouvait être deviné).
+- Comptes d'équipe : mot de passe provisoire affiché une fois, changement obligatoire à la première connexion, réinitialisation par le super admin ; commande `cantine:super-admin`.
+- Nouveau rôle « Agent de comptoir » limité à l'écran Comptoir (le compte comptoir avait tous les droits d'administration).
+- En-têtes de sécurité HTTP (CSP, X-Frame-Options, Permissions-Policy, HSTS…), HTTPS et cookies sécurisés forcés en production.
+- Journal d'audit verrouillé par des déclencheurs en base de données.
+- Seeder de démonstration refusé en production.
 ### Ajouté
 - API REST v1 (`/api/v1`) pour les applications et services partenaires : menus, plats, réservations, commandes, service au comptoir, statistiques, stocks, comptes, recharge idempotente. Documentation `docs/API.md`.
 - Écran Super admin › Clés d'API : création (clé affichée une seule fois, stockée hachée), permissions par clé, limite par minute, expiration, suspension, renouvellement, révocation, suivi d'utilisation, journal d'audit.

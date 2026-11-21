@@ -25,7 +25,7 @@ class UserController extends Controller
 
     public function show(User $user)
     {
-        abort_if($user->isAdmin() || $user->status === 'trashed', 404);
+        abort_if($user->isStaff() || $user->status === 'trashed', 404);
         $user->load('parents', 'children');
 
         return view('admin.user', ['u' => $user, 'txs' => $user->transactions()->latest()->limit(10)->get(), 'res' => $user->reservations()->with('menu')->latest()->limit(8)->get()]);

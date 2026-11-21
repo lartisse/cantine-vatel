@@ -58,14 +58,26 @@ CANTINE_CUTOFF=10:00
 CANTINE_TRASH_DAYS=30
 PAYMENT_ENV=live          # « test » tant que les clés de production n'ont pas été testées en S5
 UPLOAD_MAX_KB=5120
+
+# Sessions : cookies chiffrés, envoyés uniquement en HTTPS, inaccessibles au JavaScript
+SESSION_ENCRYPT=true
+SESSION_SECURE_COOKIE=true
+SESSION_HTTP_ONLY=true
+SESSION_SAME_SITE=lax
+BCRYPT_ROUNDS=12
 ```
 
+En production (`APP_ENV=production`), l'application force aussi les liens en HTTPS, active les cookies sécurisés si `SESSION_SECURE_COOKIE` n'est pas renseigné, et exige des mots de passe d'au moins 10 caractères (lettres et chiffres) absents des fuites connues (vérification anonymisée auprès de *Have I Been Pwned*). Chaque réponse porte des en-têtes de sécurité : `Content-Security-Policy` (aucune source externe), `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` (caméra limitée au site) et `Strict-Transport-Security` en HTTPS.
+
 > Les clés des fournisseurs de paiement ne vont **jamais** dans `.env` : le super administrateur les saisit dans l'écran S5, où elles sont chiffrées avec `APP_KEY`. Conservez `APP_KEY` précieusement : la changer rend les clés enregistrées illisibles.
+>
+> **Pas de données de démonstration en production** : le seeder crée des comptes au mot de passe connu (`password`), il refuse donc de s'exécuter quand `APP_ENV=production`. Le premier super administrateur se crée avec `php artisan cantine:super-admin` ; il crée ensuite l'équipe dans *Super admin › Équipe* (mot de passe provisoire à changer à la première connexion).
 >
 > Le serveur d'envoi des e-mails (SMTP) se configure de la même façon, dans **Super admin › Paramètres de l'application** : une fois activée, cette configuration remplace les variables `MAIL_*` du `.env` (qui restent la valeur de secours). Le mot de passe SMTP est chiffré avec `APP_KEY`. Le bouton « Envoyer un e-mail de test » vérifie la connexion.
 
 ```bash
-php artisan migrate --force          # ajouter --seed uniquement pour une instance de démonstration
+php artisan migrate --force
+php artisan cantine:super-admin direction@exemple.ci --prenom=Prénom --nom=Nom   # premier super administrateur (mot de passe demandé, masqué)
 php artisan storage:link
 php artisan config:cache && php artisan route:cache && php artisan view:cache
 sudo chown -R www-data:www-data storage bootstrap/cache

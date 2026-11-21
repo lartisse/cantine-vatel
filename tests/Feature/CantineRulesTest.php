@@ -214,11 +214,11 @@ class CantineRulesTest extends TestCase
     public function test_liaison_parent_par_code_de_secours(): void
     {
         $this->actingAs($this->user('i.kone@gmail.com'));
-        $this->post('/parent/lier/verifier', ['code' => 'INE-5Q1'])->assertRedirect('/parent/lier');
-        $this->post('/parent/lier', ['code' => 'INE-5Q1'])->assertRedirect('/parent');
+        $this->post('/parent/lier/verifier', ['code' => 'INE-7KQ2MX'])->assertRedirect('/parent/lier');
+        $this->post('/parent/lier', ['code' => 'INE-7KQ2MX'])->assertRedirect('/parent');
         $this->assertTrue($this->user('i.kone@gmail.com')->children()->where('email', 'ines.kone@vatel.ci')->exists());
         // usage unique
-        $this->post('/parent/lier/verifier', ['code' => 'INE-5Q1'])->assertSessionHasErrors('code');
+        $this->post('/parent/lier/verifier', ['code' => 'INE-7KQ2MX'])->assertSessionHasErrors('code');
     }
 
     public function test_un_utilisateur_ne_voit_pas_la_reservation_d_un_autre(): void

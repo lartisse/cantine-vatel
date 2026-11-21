@@ -22,7 +22,7 @@
     </div>
     <form method="POST" action="{{ route('parent.link.find') }}" id="link-form">@csrf
         <details class="mt" {{ $errors->any() ? 'open' : '' }}><summary class="small" style="cursor:pointer">{{ __('Le scan ne fonctionne pas ? Saisir le code de secours') }}</summary>
-            <div class="field mt"><input class="input" name="code" id="lk-code" placeholder="Ex. INE-5Q1" style="text-transform:uppercase;letter-spacing:.1em" value="{{ old('code') }}"></div>
+            <div class="field mt"><input class="input" name="code" id="lk-code" placeholder="Ex. INE-7KQ2MX" style="text-transform:uppercase;letter-spacing:.1em" value="{{ old('code') }}"></div>
             <button class="btn ghost block">{{ __('Valider le code') }}</button>
         </details>
     </form>

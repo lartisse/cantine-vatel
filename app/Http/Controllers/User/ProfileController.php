@@ -11,13 +11,30 @@ use Illuminate\Support\Str;
 /** U12 QR code de liaison parent, U13 demande de suppression de compte. */
 class ProfileController extends Controller
 {
+    /**
+     * Code de secours : 3 lettres du prénom + 6 caractères aléatoires sans ambiguïté (pas de 0/O, 1/I/L),
+     * soit 31^6 ≈ 887 millions de combinaisons ; combiné à 15 min de validité, à l'usage unique
+     * et à la limite de 5 essais par minute, il ne peut pas être deviné.
+     */
+    public static function backupCode(?string $firstName): string
+    {
+        $alphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+        $random = '';
+        for ($i = 0; $i < 6; $i++) {
+            $random .= $alphabet[random_int(0, strlen($alphabet) - 1)];
+        }
+        $prefix = strtoupper(Str::substr(preg_replace('/[^A-Za-z]/', '', Str::ascii((string) $firstName)), 0, 3)) ?: 'CVL';
+
+        return $prefix.'-'.$random;
+    }
+
     public static function newToken($child): LinkToken
     {
         LinkToken::where('child_id', $child->id)->whereNull('used_at')->update(['expires_at' => now()]);
 
         return LinkToken::create([
             'child_id' => $child->id, 'token' => Str::random(40),
-            'code' => strtoupper(Str::substr(Str::ascii($child->first_name), 0, 3)).'-'.strtoupper(Str::random(3)),
+            'code' => self::backupCode($child->first_name),
             'expires_at' => now()->addMinutes(15),
         ]);
     }
