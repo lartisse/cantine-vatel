@@ -150,6 +150,8 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('super')->name('super.')
     });
     Route::get('/parametres', [Super\SettingsController::class, 'index'])->name('settings');
     Route::put('/parametres', [Super\SettingsController::class, 'update'])->name('settings.update');
+    Route::put('/parametres/smtp', [Super\SettingsController::class, 'smtp'])->name('settings.smtp');
+    Route::post('/parametres/smtp/test', [Super\SettingsController::class, 'smtpTest'])->middleware('throttle:5,1')->name('settings.smtp.test');
     Route::get('/audit', [Super\AuditController::class, 'index'])->name('audit');
     Route::get('/audit/export', [Super\AuditController::class, 'export'])->name('audit.export');
 });

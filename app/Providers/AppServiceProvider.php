@@ -19,6 +19,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Configuration SMTP saisie par le super administrateur (prioritaire sur MAIL_* du .env quand elle est activée)
+        try {
+            \App\Support\MailSettings::apply();
+        } catch (\Throwable) {
+            // base pas encore migrée : on garde la configuration du .env
+        }
     }
 }

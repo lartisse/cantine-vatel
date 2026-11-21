@@ -61,6 +61,8 @@ UPLOAD_MAX_KB=5120
 ```
 
 > Les clés des fournisseurs de paiement ne vont **jamais** dans `.env` : le super administrateur les saisit dans l'écran S5, où elles sont chiffrées avec `APP_KEY`. Conservez `APP_KEY` précieusement : la changer rend les clés enregistrées illisibles.
+>
+> Le serveur d'envoi des e-mails (SMTP) se configure de la même façon, dans **Super admin › Paramètres de l'application** : une fois activée, cette configuration remplace les variables `MAIL_*` du `.env` (qui restent la valeur de secours). Le mot de passe SMTP est chiffré avec `APP_KEY`. Le bouton « Envoyer un e-mail de test » vérifie la connexion.
 
 ```bash
 php artisan migrate --force          # ajouter --seed uniquement pour une instance de démonstration

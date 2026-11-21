@@ -4,6 +4,7 @@ Toutes les évolutions notables du projet. Format : [Keep a Changelog](https://k
 
 ## [Non publié]
 ### Ajouté
+- Configuration SMTP dans « Paramètres de l'application » (super admin) : mot de passe chiffré et masqué, ressaisie du mot de passe, e-mail de test, journal d'audit ; prioritaire sur `MAIL_*` du `.env` une fois activée.
 - Suggestions : un plat par catégorie dans un carrousel interactif (flèches, points, balayage, clavier) à défilement automatique ; délai réglable par le super administrateur (5 s par défaut).
 - Espaces élève/personnel/parent en plein écran responsive ; administration utilisable sur mobile.
 ### Supprimé

@@ -139,7 +139,7 @@ Chaque groupe de routes est protégé par le middleware `role:`. Un administrate
 - **A1** tableau de bord · **A2** menus (glisser-déposer) · **A3** commandes du jour/semaine, fiche de production, clôture, panier anti-gaspi · **A4** stocks calculés depuis les recettes, entrées, pertes, bon de commande · **A5** plats et recettes (photo, aperçu, archivage, suppression douce) · **A6** rapports CSV/PDF · **A7** utilisateurs, ajustement de solde · **A8** modération des avis · **A9** statistiques par classe · **A10** paramètres (créneaux, heure limite, période scolaire, mots interdits) · **A11** comptoir · **A12** alertes allergie (voir la commande, contacter le parent ou le convive, marquer comme vérifié).
 
 ### Super administrateur
-- **S1** administrateurs (création, rôle, désactivation avec motif) · **S2** comptes · **S3** corbeille (restauration, suppression définitive en retapant le nom ou le mot de passe, purge planifiée, délai paramétrable) · **S4** demandes de suppression (accepter / refuser avec message) · **S5** moyens de paiement Test/Production · **S6** journal d'audit filtrable, export CSV · **Paramètres de l'application** (`/super/parametres`) : délai du défilement automatique du carrousel « Suggestions pour vous » (5 s par défaut, 0 = désactivé), tracé dans l'audit.
+- **S1** administrateurs (création, rôle, désactivation avec motif) · **S2** comptes · **S3** corbeille (restauration, suppression définitive en retapant le nom ou le mot de passe, purge planifiée, délai paramétrable) · **S4** demandes de suppression (accepter / refuser avec message) · **S5** moyens de paiement Test/Production · **S6** journal d'audit filtrable, export CSV · **Paramètres de l'application** (`/super/parametres`) : délai du défilement automatique du carrousel « Suggestions pour vous » (5 s par défaut, 0 = désactivé) et **configuration SMTP** (serveur, port, chiffrement, identifiant, mot de passe chiffré et masqué, expéditeur, e-mail de test, ressaisie du mot de passe du super admin), tracés dans l'audit.
 
 ## 6. Parcours de démonstration
 
@@ -251,7 +251,7 @@ cantine-vatel/
 
 ## 14. Ce qui est simulé, ce qui est prévu
 
-**Simulé** : appels aux fournisseurs de paiement (pilote `SimulatedGateway`, références fictives), envoi des e-mails/SMS (notifications internes uniquement), e-mail d'activation des administrateurs, export PDF (impression du navigateur).
+**Simulé** : appels aux fournisseurs de paiement (pilote `SimulatedGateway`, références fictives), SMS ; les notifications restent internes (le serveur SMTP est configurable par le super admin, mais l'application n'envoie encore que l'e-mail de test), e-mail d'activation des administrateurs, export PDF (impression du navigateur).
 
 **Prévu**
 - Pilotes réels Wave, Orange Money, CinetPay sur l'interface `PaymentGateway`.

@@ -239,6 +239,37 @@ class CantineRulesTest extends TestCase
         $this->actingAs($this->user('awa.kone@vatel.ci'))->get('/accueil')->assertSee('data-interval="3"', false);
     }
 
+    public function test_configuration_smtp_par_le_super_admin(): void
+    {
+        $payload = ['enabled' => 1, 'host' => 'smtp.exemple.ci', 'port' => 587, 'encryption' => 'tls', 'username' => 'cantine', 'password' => 'SecretSmtp9x7Q',
+            'from_address' => 'no-reply@cantine-vatel.ci', 'from_name' => 'Cantine de Vatel'];
+        // Un administrateur n'y a pas accès
+        $this->actingAs($this->user('gestion@cantine-vatel.ci'))->put('/super/parametres/smtp', $payload + ['current_password' => 'password'])->assertForbidden();
+
+        $this->actingAs($this->user('superadmin@cantine-vatel.ci'));
+        // Ressaisie du mot de passe obligatoire
+        $this->put('/super/parametres/smtp', $payload + ['current_password' => 'faux'])->assertSessionHasErrors('current_password');
+        $this->put('/super/parametres/smtp', $payload + ['current_password' => 'password'])->assertSessionHasNoErrors();
+        Settings::flush();
+
+        // Mot de passe chiffré en base, jamais réaffiché
+        $stored = \App\Models\Setting::where('key', 'smtp_password')->value('value');
+        $this->assertNotSame('SecretSmtp9x7Q', $stored);
+        $this->assertSame('SecretSmtp9x7Q', Crypt::decryptString($stored));
+        $this->get('/super/parametres')->assertOk()->assertDontSee('SecretSmtp9x7Q')->assertSee('••••••••9x7Q', false);
+
+        // Mot de passe vide = conservé ; configuration appliquée à Laravel
+        $this->put('/super/parametres/smtp', array_merge($payload, ['password' => '', 'port' => 2525, 'current_password' => 'password']))->assertSessionHasNoErrors();
+        Settings::flush();
+        $this->assertTrue(\App\Support\MailSettings::apply());
+        $this->assertSame('smtp', config('mail.default'));
+        $this->assertSame('smtp.exemple.ci', config('mail.mailers.smtp.host'));
+        $this->assertSame(2525, config('mail.mailers.smtp.port'));
+        $this->assertSame('SecretSmtp9x7Q', config('mail.mailers.smtp.password'));
+        $this->assertSame('no-reply@cantine-vatel.ci', config('mail.from.address'));
+        $this->assertTrue(AuditLog::where('details', 'like', 'SMTP%')->exists());
+    }
+
     public function test_toutes_les_pages_principales_repondent(): void
     {
         $pages = [
