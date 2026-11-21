@@ -69,3 +69,6 @@ label.slot, label.pay-method, label.amount-btn, label.choice { cursor: pointer; 
 .dish-row .price { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; white-space: nowrap; }
 .dish-row .price .stepper { margin-top: 2px; }
 @media (max-width: 400px) { .dish-row .info h4 { font-size: 14px; } .dish-row .dish-img.md { width: 56px; height: 56px; } }
+/* Jours du menu (liens) : texte lisible, blanc sur le jour sélectionné */
+a.day { color: var(--ink); text-decoration: none; }
+a.day.active, a.day.active b { color: #fff; }

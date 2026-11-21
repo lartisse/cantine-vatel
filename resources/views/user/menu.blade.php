@@ -17,7 +17,7 @@
 @else
 <div class="days">
     @foreach ($menus as $m)
-        <a class="day {{ $menu && $m->id === $menu->id ? 'active' : '' }} {{ $m->date->isToday() ? 'today' : '' }}" href="{{ $q(['jour' => $m->date->toDateString()]) }}" style="color:inherit"><small>{{ ucfirst($m->date->locale(app()->getLocale())->translatedFormat('D')) }}</small><b>{{ $m->date->format('d') }}</b></a>
+        <a class="day {{ $menu && $m->id === $menu->id ? 'active' : '' }} {{ $m->date->isToday() ? 'today' : '' }}" href="{{ $q(['jour' => $m->date->toDateString()]) }}"><small>{{ ucfirst($m->date->locale(app()->getLocale())->translatedFormat('D')) }}</small><b>{{ $m->date->format('d') }}</b></a>
     @endforeach
 </div>
 <div class="hscroll mb" style="gap:8px">@foreach ($cats as $k => $l)<a class="chip {{ $cat === $k ? 'active' : '' }}" href="{{ $q(['cat' => $k]) }}">{{ $l }}</a>@endforeach</div>
