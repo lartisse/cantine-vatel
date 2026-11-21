@@ -80,8 +80,48 @@
     if (s.dataset.submit !== undefined) i.form.submit();
   });
 
-  // ---------- Sauvegarde hors ligne des QR (localStorage) ----------
-  App.saveOffline = (key, data) => { try { localStorage.setItem('cv:' + key, JSON.stringify(data)); } catch (e) { /* mode privé */ } };
+  // ---------- Hors ligne : QR codes des réservations à venir enregistrés sur l'appareil (localStorage) ----------
+  const store = {
+    get: (k) => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } },
+    set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* mode privé ou stockage plein */ } },
+    keys: () => { try { return Object.keys(localStorage).filter((k) => k.startsWith('cv:')); } catch (e) { return []; } },
+    del: (k) => { try { localStorage.removeItem(k); } catch (e) { /* ignore */ } },
+  };
+  const todayIso = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  App.saveOffline = (key, data) => store.set('cv:' + key, data);
+  // Remplace la liste complète (réservations annulées ou servies retirées de l'appareil)
+  App.syncOfflineReservations = (list) => {
+    store.keys().filter((k) => k.startsWith('cv:resa-')).forEach(store.del);
+    (list || []).forEach((r) => store.set('cv:resa-' + r.id, r));
+  };
+  // Purge des QR codes dont la date est passée
+  store.keys().filter((k) => k.startsWith('cv:resa-')).forEach((k) => { const r = store.get(k); if (!r || !r.iso || r.iso < todayIso) store.del(k); });
+  const offlineData = document.getElementById('offline-reservations');
+  if (offlineData) { try { App.syncOfflineReservations(JSON.parse(offlineData.textContent)); } catch (e) { /* données invalides */ } }
+
+  // Déconnexion : effacer les QR et les pages personnelles mises en cache (téléphone partagé)
+  App.clearOffline = () => {
+    store.keys().forEach(store.del);
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage('clear');
+  };
+  document.addEventListener('submit', (e) => { if (/\/deconnexion$/.test(e.target.getAttribute('action') || '')) App.clearOffline(); }, true);
+
+  // Bandeau « hors ligne »
+  const offlineBar = () => {
+    let bar = document.getElementById('offline-bar');
+    if (navigator.onLine) { if (bar) bar.remove(); return; }
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'offline-bar';
+      bar.className = 'offline-bar';
+      bar.setAttribute('role', 'status');
+      bar.textContent = document.documentElement.lang === 'en' ? 'Offline — showing the last saved version. Your QR codes remain available.' : 'Hors ligne — affichage de la dernière version enregistrée. Vos QR codes restent disponibles.';
+      document.body.prepend(bar);
+    }
+  };
+  window.addEventListener('online', () => { offlineBar(); App.toast(document.documentElement.lang === 'en' ? 'Back online' : 'Connexion rétablie', 'green'); });
+  window.addEventListener('offline', offlineBar);
+  offlineBar();
 
   // ---------- Carrousels : <div data-carousel data-interval="5"> [data-track] [data-slide] [data-dots] ----------
   // Défilement automatique toutes les N secondes (0 = désactivé), en boucle ; pause au survol, au toucher, au focus

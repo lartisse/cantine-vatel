@@ -3,6 +3,8 @@
 Toutes les évolutions notables du projet. Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versions : [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
+### Corrigé
+- Mode hors ligne : QR codes de toutes les réservations à venir enregistrés à chaque visite (et non plus seulement à l'ouverture du détail), QR périmés ou annulés retirés, pages jamais remplacées par une redirection vers la connexion, menu d'un autre jour servi depuis le cache, bandeau « hors ligne », effacement des QR et des pages personnelles à la déconnexion (téléphone partagé). Testé dans Chrome avec le serveur coupé.
 ### Ajouté
 - Classes de l'école gérées par le super admin (Paramètres de l'application) : ajout en lot, retrait, adoption des classes saisies par les élèves. L'élève choisit dans la liste ou saisit sa classe via « Autre » (orthographe officielle réutilisée si la classe existe déjà).
 ### Sécurité

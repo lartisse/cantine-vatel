@@ -8,6 +8,10 @@
         : [['home', route('user.home'), 'home', __('Accueil')], ['menu', route('menu'), 'calendar', __('Menu')], ['resa', route('reservations.index'), 'ticket', __('Réservations')], ['wallet', route('wallet'), 'card', __('Portefeuille')], ['profile', route('profile'), 'user', __('Profil')]];
 @endphp
 {{-- Espaces élève, personnel et parent : plein écran, barre d'onglets en bas sur mobile, menu latéral sur ordinateur --}}
+@if ($u->role === 'user')
+{{-- QR codes des réservations à venir, enregistrés sur l'appareil pour un affichage hors ligne (public/offline.html) --}}
+<script type="application/json" id="offline-reservations">@json(\App\Support\OfflineReservations::forUser($u))</script>
+@endif
 <div class="app-shell">
     <nav class="tabbar" aria-label="{{ __('Navigation') }}">
         <a href="{{ $u->homeRoute() }}" class="tab-brand"><img src="{{ asset('img/vatel_logo.png') }}" alt="Vatel"><span>Cantine de Vatel<small>{{ $u->name }}</small></span></a>

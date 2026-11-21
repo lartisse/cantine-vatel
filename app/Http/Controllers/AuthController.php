@@ -90,6 +90,8 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        // Efface du navigateur les pages et QR codes enregistrés pour le mode hors ligne (téléphone partagé).
+        // Complète le nettoyage fait en JavaScript (App.clearOffline) pour les navigateurs qui gèrent cet en-tête.
+        return redirect('/')->header('Clear-Site-Data', '"cache", "storage"');
     }
 }

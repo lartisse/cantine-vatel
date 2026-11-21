@@ -202,3 +202,5 @@ a.day.active, a.day.active b { color: #fff; }
 .class-x { border: 0; background: none; padding: 2px; margin-left: 2px; cursor: pointer; color: var(--muted); display: inline-flex; border-radius: 50%; }
 .class-x:hover { background: var(--red-50); color: var(--red); }
 .class-x svg.ic { width: 14px; height: 14px; }
+/* Bandeau « hors ligne » */
+.offline-bar { position: sticky; top: 0; z-index: 100; background: var(--orange); color: #fff; font-size: 13px; font-weight: 600; text-align: center; padding: 8px 12px; }

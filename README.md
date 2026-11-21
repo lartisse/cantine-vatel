@@ -104,7 +104,7 @@ php artisan serve                         # http://127.0.0.1:8000
 | Application mobile | Interface mobile d'abord, **installable** (manifest + service worker). Pas d'application native |
 | Paiement Mobile Money | Interface `PaymentGateway` prête (Wave, Orange Money, MTN MoMo, Moov, carte, CinetPay, PayDunya) ; paiements **simulés** |
 | Notifications en temps réel | Notifications internes (réservation, solde bas, repas servi, allergie, menu publié). Push / SMS : prévus |
-| Mode hors ligne | Fait : QR code et pages déjà consultées (menu, réservations) disponibles hors ligne |
+| Mode hors ligne | Fait et testé dans Chrome serveur coupé : QR code et code de secours des réservations à venir enregistrés sur l'appareil, pages déjà consultées (accueil, menu, réservations, portefeuille, espace parent) servies hors ligne, page « Vous êtes hors ligne » qui réaffiche les QR, bandeau hors ligne ; tout est effacé de l'appareil à la déconnexion |
 
 ## 4. Rôles et droits d'accès
 

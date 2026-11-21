@@ -35,7 +35,9 @@
 @if ($r->status !== 'cancelled' && ! $r->menu->date->isFuture())
     <a class="btn {{ $reviewed ? 'ghost' : '' }} block mt" href="{{ route('reviews.create', $r->menu) }}">@if ($reviewed){{ __('Voir mon avis') }}@else{!! ic('star', 'ic-star') !!} {{ __('Donner mon avis sur ce menu') }}@endif</a>
 @endif
+@if ($r->status === 'paid')
 @push('scripts')
-<script>App.saveOffline('resa-{{ $r->id }}', { code: '{{ $r->code }}', qr: 'CV:{{ $r->qr_token }}', date: @json($r->menu->label()), slot: '{{ $r->slotLabel() }}' });</script>
+<script>App.saveOffline('resa-{{ $r->id }}', @json(\App\Support\OfflineReservations::payload($r)));</script>
 @endpush
+@endif
 @endsection
