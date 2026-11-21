@@ -86,4 +86,13 @@
     <div class="card flat"><div class="row"><x-dish-img :dish="$suggestion['dish']" size="md" /><div class="grow"><b>{{ $suggestion['dish']->name }}</b><div class="small muted">{{ $suggestion['menu']->label() }}</div><div class="xs mt">{{ $suggestion['reason'] }}</div></div></div>
         <a class="btn light block mt" href="{{ route('reservations.create', [$suggestion['menu'], 'plat' => $suggestion['dish']->id]) }}">{{ __('Réserver ce plat') }}</a></div>
 @endif
+
+@if ($chefs->count())
+    <div class="section-title"><h3>{!! ic('graduation') !!} {{ __('Chef de la semaine') }}</h3></div>
+    <div class="card flat">
+        @foreach ($chefs as $i => $c)
+            <div class="summary-line small"><span>{{ ['🥇', '🥈', '🥉'][$i] ?? '' }} <b>{{ $c->name }}</b><br><span class="xs muted">{{ $c->creator_name ?? __('Équipe cuisine') }}</span></span><span>{!! stars($c->avg, $c->n) !!}</span></div>
+        @endforeach
+    </div>
+@endif
 @endsection

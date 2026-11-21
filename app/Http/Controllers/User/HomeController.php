@@ -28,7 +28,7 @@ class HomeController extends Controller
 
         return view('user.home', [
             'u' => $u, 'today' => $today, 'res' => $res, 'next' => $next, 'toRate' => $toRate, 'askClass' => $askClass, 'period' => $period,
-            'suggestion' => $suggestions->forUser($u), 'antigaspi' => $antigaspi, 'unread' => $u->unreadCount(),
+            'suggestion' => $suggestions->forUser($u), 'antigaspi' => $antigaspi, 'unread' => $u->unreadCount(), 'chefs' => $suggestions->chefOfTheWeek(3),
         ]);
     }
 
