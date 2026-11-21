@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Hors ligne · Cantine de Vatel</title>
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body style="padding:20px">
+    <div class="auth-wrap" style="text-align:center">
+        <img src="/img/vatel_logo.png" alt="Vatel" style="height:56px;margin:0 auto 16px">
+        <h1>Vous êtes hors ligne</h1>
+        <p class="muted mt">Les pages déjà consultées (menu, réservations) restent disponibles. Vos QR codes enregistrés :</p>
+        <div id="qrs" class="stack mt"></div>
+        <button class="btn mt" onclick="location.reload()">Réessayer</button>
+    </div>
+    <script src="/vendor/qrcode.min.js"></script>
+    <script>
+        const box = document.getElementById('qrs');
+        Object.keys(localStorage).filter(k => k.startsWith('cv:resa-')).forEach(k => {
+            try {
+                const r = JSON.parse(localStorage.getItem(k));
+                const card = document.createElement('div');
+                card.className = 'qr-box';
+                card.innerHTML = '<b>' + r.date + ' · ' + r.slot + '</b><div class="q" style="display:flex;justify-content:center;margin:10px 0"></div><div class="qr-code-text">' + r.code + '</div>';
+                box.appendChild(card);
+                new QRCode(card.querySelector('.q'), { text: r.qr, width: 180, height: 180 });
+            } catch (e) {}
+        });
+        if (!box.children.length) box.innerHTML = '<p class="small muted">Aucun QR code enregistré sur cet appareil.</p>';
+    </script>
+</body>
+</html>
