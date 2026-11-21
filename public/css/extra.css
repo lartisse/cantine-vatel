@@ -28,3 +28,7 @@ label.slot, label.pay-method, label.amount-btn, label.choice { cursor: pointer; 
 .banner-gaspi { background: linear-gradient(135deg, #e7f6ee, #fff3e3); border-radius: var(--radius); padding: 14px; }
 @media print { .no-print { display: none !important; } }
 @media (max-width: 860px) { .impact { grid-template-columns: 1fr; } }
+/* Réserver : prix + sélecteur empilés, pour garder le nom lisible à 360 px */
+.dish-row .price { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; white-space: nowrap; }
+.dish-row .price .stepper { margin-top: 2px; }
+@media (max-width: 400px) { .dish-row .info h4 { font-size: 14px; } .dish-row .dish-img.md { width: 56px; height: 56px; } }

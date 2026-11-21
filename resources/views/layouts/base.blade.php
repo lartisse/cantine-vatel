@@ -9,7 +9,7 @@
     <link rel="icon" href="{{ asset('img/vatel_logo.png') }}">
     <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
     <link rel="stylesheet" href="{{ asset('css/app.css') }}?v=3">
-    <link rel="stylesheet" href="{{ asset('css/extra.css') }}?v=3">
+    <link rel="stylesheet" href="{{ asset('css/extra.css') }}?v=4">
     @stack('head')
 </head>
 <body class="{{ config('cantine.demo') ? 'has-demo' : 'no-demo' }}">
