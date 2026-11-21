@@ -20,9 +20,7 @@
             <div class="scan-zone">
                 <div id="reader" style="width:100%;max-width:360px;margin:0 auto;border-radius:16px;overflow:hidden;background:#111"></div>
                 <div class="row mt" style="justify-content:center">
-                    <button type="button" class="btn sky" id="cam-btn" onclick="startCam()">{!! ic('camera') !!} Scanner le QR code</button>
-                    @if ($sample)<button type="button" class="btn ghost" style="color:#fff;border-color:#444" onclick="document.getElementById('code').value='{{ $sample->code }}';document.getElementById('scan-form').submit()">Simuler un scan</button>@endif
-                </div>
+                    <button type="button" class="btn sky" id="cam-btn" onclick="startCam()">{!! ic('camera') !!} Scanner le QR code</button>                </div>
                 <p class="xs mt center" style="color:#aaa">La caméra nécessite HTTPS (ou localhost).</p>
             </div>
             <form method="POST" action="{{ route('admin.counter.scan') }}" id="scan-form" class="mt">@csrf

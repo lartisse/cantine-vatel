@@ -3,7 +3,6 @@
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CommonController;
-use App\Http\Controllers\DemoController;
 use App\Http\Controllers\ParentArea;
 use App\Http\Controllers\Super;
 use App\Http\Controllers\User;
@@ -20,11 +19,6 @@ Route::middleware('guest')->group(function () {
     Route::post('/connexion', [AuthController::class, 'login'])->middleware('throttle:10,1');
 });
 Route::post('/deconnexion', [AuthController::class, 'logout'])->name('logout');
-
-if (config('cantine.demo')) {
-    Route::post('/demo/connexion', [DemoController::class, 'login'])->name('demo.login');
-    Route::post('/demo/heure', [DemoController::class, 'time'])->name('demo.time');
-}
 
 Route::middleware('auth')->group(function () {
     Route::get('/profil', [CommonController::class, 'profile'])->name('profile');

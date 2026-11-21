@@ -13,13 +13,5 @@
         <button class="btn block">Se connecter</button>
     </form>
     <p class="center small mt">Pas encore de compte ? <a href="{{ route('register') }}">Créer un compte</a></p>
-    @if (config('cantine.demo'))
-    <div class="demo-accounts">
-        <b class="small">Comptes de démonstration</b> <span class="xs muted">(mot de passe : <code>password</code>)</span>
-        @foreach (['awa.kone@vatel.ci' => 'Élève', 'jm.aka@vatel.ci' => 'Personnel', 'i.kone@gmail.com' => 'Parent', 'gestion@cantine-vatel.ci' => 'Administrateur', 'superadmin@cantine-vatel.ci' => 'Super admin', 'comptoir1@cantine-vatel.ci' => 'Comptoir'] as $mail => $label)
-            <div class="row between"><span class="small">{{ $label }}</span><button type="button" class="btn sm light" onclick="document.getElementById('email').value='{{ $mail }}';document.getElementById('password').value='password'">{{ $mail }}</button></div>
-        @endforeach
-    </div>
-    @endif
 </div>
 @endsection

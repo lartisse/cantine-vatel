@@ -28,10 +28,10 @@ class CantineRulesTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        config(['cantine.demo' => true, 'cantine.demo_now' => '2026-11-24 09:40']);
+        // Date fixe pour des tests reproductibles (l'application, elle, utilise l'heure réelle)
+        Carbon::setTestNow('2026-11-24 09:40');
         $this->seed();
         Settings::flush();
-        Carbon::setTestNow('2026-11-24 09:40');
     }
 
     protected function user(string $email): User

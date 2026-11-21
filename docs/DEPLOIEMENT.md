@@ -58,10 +58,6 @@ CANTINE_CUTOFF=10:00
 CANTINE_TRASH_DAYS=30
 PAYMENT_ENV=live          # « test » tant que les clés de production n'ont pas été testées en S5
 UPLOAD_MAX_KB=5120
-
-# Mode démo : TOUJOURS désactivé en production (barre de démo + horloge figée)
-CANTINE_DEMO=false
-CANTINE_DEMO_NOW=
 ```
 
 > Les clés des fournisseurs de paiement ne vont **jamais** dans `.env` : le super administrateur les saisit dans l'écran S5, où elles sont chiffrées avec `APP_KEY`. Conservez `APP_KEY` précieusement : la changer rend les clés enregistrées illisibles.
@@ -132,7 +128,7 @@ Sur n'importe quel ordinateur avec PHP 8.2 (extensions `gd`, `pdo_sqlite`, `file
 git clone https://github.com/lartisse/cantine-vatel.git cantine-vatel && cd cantine-vatel
 composer install
 cp .env.example .env && php artisan key:generate
-# .env : DB_CONNECTION=sqlite, CANTINE_DEMO=true, CANTINE_DEMO_NOW="2026-11-24 09:40"
+# .env : DB_CONNECTION=sqlite (valeur par défaut de .env.example)
 touch database/database.sqlite          # Windows : type nul > database\database.sqlite
 php artisan migrate:fresh --seed
 php artisan storage:link

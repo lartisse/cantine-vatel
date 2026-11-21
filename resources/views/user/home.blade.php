@@ -61,7 +61,7 @@
 @elseif ($today && $today->isOpen())
     <div class="card" style="border:2px dashed var(--sky)"><b>{{ __('Vous n’avez pas encore réservé') }}</b><p class="small muted">{{ __('Il reste jusqu’à :h pour réserver le repas d’aujourd’hui.', ['h' => $cutoff]) }}</p><a class="btn block mt" href="{{ route('reservations.create', $today) }}">{{ __('Réserver maintenant') }}</a></div>
 @else
-    <div class="card"><b>{{ __('Réservations du jour closes') }}</b><p class="small muted">{{ __('Les réservations ferment à :h.', ['h' => $cutoff]) }} @if ($next){{ __('Pensez à réserver pour :d.', ['d' => mb_strtolower($next->label())]) }}@endif</p>
+    <div class="card"><b>{{ $today ? __('Réservations du jour closes') : __('Pas de service aujourd’hui') }}</b><p class="small muted">@if ($today){{ __('Les réservations ferment à :h.', ['h' => $cutoff]) }}@endif @if ($next){{ __('Pensez à réserver pour :d.', ['d' => mb_strtolower($next->label())]) }}@endif</p>
         @if ($next)<a class="btn light block mt" href="{{ route('reservations.create', $next) }}">{{ __('Réserver pour :d', ['d' => $next->label('D j M')]) }}</a>@endif</div>
 @endif
 </div>

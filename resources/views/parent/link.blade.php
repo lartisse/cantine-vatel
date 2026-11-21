@@ -28,7 +28,6 @@
     </form>
     @error('code')<div class="alert red mt">{{ $message }}</div>@enderror
     <p class="xs muted mt">{{ __('La liaison se fait uniquement par le QR code de l’élève (le matricule n’est pas utilisé). Vous pouvez lier plusieurs enfants.') }}</p>
-    @if (config('cantine.demo'))<p class="xs muted mt">Démo : code de secours d’Inès <code>INE-5Q1</code></p>@endif
 @endif
 @push('scripts')
 <script src="{{ asset('vendor/html5-qrcode.min.js') }}"></script>

@@ -19,9 +19,8 @@ class CounterController extends Controller
         $total = $menu ? Reservation::where('menu_id', $menu->id)->whereIn('status', ['paid', 'served'])->count() : 0;
         $served = $menu ? Reservation::where('menu_id', $menu->id)->where('status', 'served')->count() : 0;
         $recent = $menu ? Reservation::with('user', 'items.dish')->where('menu_id', $menu->id)->where('status', 'served')->latest('served_at')->limit(6)->get() : collect();
-        $sample = $menu ? Reservation::where('menu_id', $menu->id)->where('status', 'paid')->where('slot', $this->service->currentSlot())->inRandomOrder()->first() : null;
 
-        return view('admin.counter', ['result' => session('result'), 'total' => $total, 'served' => $served, 'recent' => $recent, 'slot' => $this->service->currentSlot(), 'sample' => $sample]);
+        return view('admin.counter', ['result' => session('result'), 'total' => $total, 'served' => $served, 'recent' => $recent, 'slot' => $this->service->currentSlot()]);
     }
 
     public function scan(Request $request)

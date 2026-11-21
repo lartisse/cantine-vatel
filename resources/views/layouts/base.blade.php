@@ -12,9 +12,8 @@
     <link rel="stylesheet" href="{{ asset('css/extra.css') }}?v=4">
     @stack('head')
 </head>
-<body class="{{ config('cantine.demo') ? 'has-demo' : 'no-demo' }}">
+<body class="no-demo">
     @include('partials.icons')
-    @include('partials.demo-bar')
     <div id="app">@yield('body')</div>
 
     <div class="toast-wrap" id="toasts">

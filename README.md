@@ -60,7 +60,7 @@ php artisan serve                         # http://127.0.0.1:8000
 | Super administrateur | superadmin@cantine-vatel.ci |
 | Comptoir (administrateur, écran A11) | comptoir1@cantine-vatel.ci |
 
-**Barre de démonstration** (`CANTINE_DEMO=true`) : en haut de l'écran, changer de rôle en un clic et changer l'heure. L'horloge est figée au **mardi 24 novembre 2026** (`CANTINE_DEMO_NOW`) : 09h40 = réservations du jour ouvertes, 12h10 = service du midi au comptoir. En production, `CANTINE_DEMO=false` retire la barre et utilise l'heure réelle.
+**Heure** : l'application utilise l'heure réelle, fuseau `Africa/Abidjan` (`APP_TIMEZONE`). L'heure limite (10h00 par défaut) et le créneau en cours au comptoir sont calculés côté serveur, pour que personne ne puisse contourner la règle en changeant l'heure de son téléphone. Les données de démonstration suivent la date du jour : `migrate:fresh --seed` génère l'historique des semaines passées, des réservations pour le prochain jour de service et le menu de la semaine (ou de la semaine suivante le week-end).
 
 ## 2. Le problème et la solution
 
@@ -146,7 +146,7 @@ Chaque groupe de routes est protégé par le middleware `role:`. Un administrate
 1. **Admin › Menus** (semaine suivante) : glisser un plat du catalogue dans une case, « Publier le menu ».
 2. **Élève (Awa) › Menu** : le riz sauce arachide est signalé. Réserver attiéké + bissap, créneau 12h00 → QR code.
 3. **Élève** : « Modifier » la réservation et ajouter le riz sauce arachide → modale « Plat incompatible » → confirmer. **Admin › Alertes** : l'alerte est arrivée ; contacter le parent, marquer comme vérifié (audit).
-4. **Comptoir** (barre de démo : heure 12:10, rôle Comptoir) : « Simuler un scan » ou saisir le code → **Validé**, alerte allergie affichée.
+4. **Comptoir** (compte comptoir1) : scanner le QR code avec la caméra ou saisir le code de secours → **Validé** (ou « Mauvais créneau » avec « Servir quand même »), alerte allergie affichée.
 5. **Admin › Tableau de bord / Commandes** : repas servi, prévision « préparez Y », impact anti-gaspi.
 6. **Parent** : alerte de solde bas de Yao, recharge Wave simulée ; « Ajouter un enfant » avec le code `INE-5Q1`.
 7. **Élève** : noter le repas de lundi. **Admin › Avis** : les avis contenant des mots interdits sont signalés.
@@ -204,7 +204,7 @@ Voir [Démarrage rapide](#1-démarrage-rapide) et, pour un serveur, [`docs/DEPLO
 | `CANTINE_TRASH_DAYS` | Jours en corbeille avant purge (modifiable en S3) | `30` |
 | `PAYMENT_ENV` | Environnement de paiement actif | `test` |
 | `UPLOAD_MAX_KB` | Taille maximale des images | `5120` |
-| `CANTINE_DEMO` / `CANTINE_DEMO_NOW` | Barre de démo et horloge figée | `true` / `2026-11-24 09:40` |
+| `APP_TIMEZONE` | Fuseau horaire des règles (heure limite, créneaux) | `Africa/Abidjan` |
 
 ## 11. Sécurité
 

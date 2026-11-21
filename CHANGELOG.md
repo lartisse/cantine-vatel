@@ -2,6 +2,12 @@
 
 Toutes les évolutions notables du projet. Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versions : [SemVer](https://semver.org/lang/fr/).
 
+## [Non publié]
+### Supprimé
+- Barre de démonstration (changement de rôle et d'heure), horloge figée, connexion en un clic, comptes affichés sur la page de connexion et bouton « Simuler un scan » du comptoir.
+### Modifié
+- L'application utilise l'heure réelle (fuseau Africa/Abidjan) ; le seeder génère des données alignées sur la date du jour.
+
 ## [1.0.0] — 2026-11-21
 ### Ajouté
 - Revue de sécurité : `ReservationPolicy`, redirection sûre après confirmation du mot de passe, test d'isolation entre utilisateurs.

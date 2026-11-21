@@ -34,10 +34,10 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
-        Clock::apply();
         mt_srand(42);
         $today = Carbon::today();
-        $monday = $today->copy()->startOfWeek(Carbon::MONDAY);
+        // Semaine de référence = semaine en cours (ou la suivante le week-end) : les données suivent la date réelle.
+        $monday = $today->isWeekend() ? $today->copy()->next(Carbon::MONDAY) : $today->copy()->startOfWeek(Carbon::MONDAY);
         $pwd = Hash::make('password');
 
         // ---------- Paramètres ----------
@@ -161,6 +161,17 @@ class DatabaseSeeder extends Seeder
             Menu::create(['date' => $monday->copy()->addWeek()->addDays($d), 'is_published' => false]);
         }
 
+        // Dernier jour de service passé et prochain jour de service (aujourd'hui en semaine)
+        $dates = array_keys($menus);
+        $lastPastDate = collect($dates)->filter(fn ($d) => Carbon::parse($d)->lt($today))->last();
+        $nextOpenDate = collect($dates)->first(fn ($d) => Carbon::parse($d)->gte($today));
+        $afterNextDate = collect($dates)->first(fn ($d) => $d > $nextOpenDate);
+        // Le riz sauce arachide est au menu du prochain jour de service (cas de démonstration allergie)
+        if (! in_array('d5', $menus[$nextOpenDate][1]['plat'], true)) {
+            $menus[$nextOpenDate][1]['plat'][] = 'd5';
+            $menus[$nextOpenDate][0]->items()->create(['dish_id' => $this->dish['d5'], 'planned_portions' => 80]);
+        }
+
         // ---------- Réservations ----------
         $prices = Dish::pluck('price', 'id');
         $slots = array_keys(config('cantine.slots'));
@@ -186,12 +197,12 @@ class DatabaseSeeder extends Seeder
         };
         foreach ($menus as $dateStr => [$menu, $plan]) {
             $date = Carbon::parse($dateStr);
-            if ($date->gt($today->copy()->addDay())) {
+            $isPast = $date->lt($today);
+            $isToday = $dateStr === $nextOpenDate;
+            if (! $isPast && ! $isToday && $dateStr !== $afterNextDate) {
                 continue;
             }
-            $isPast = $date->lt($today);
-            $isToday = $date->isSameDay($today);
-            $count = $isToday ? 96 : ($date->isSameDay($today->copy()->addDay()) ? 41 : 85 + mt_rand(0, 30));
+            $count = $isToday ? 96 : ($dateStr === $afterNextDate ? 41 : 85 + mt_rand(0, 30));
             for ($i = 0; $i < $count; $i++) {
                 $u = $others[($i * ($isToday || $isPast ? 1 : 3)) % count($others)];
                 $keys = [$pick($plan['plat'])];
@@ -208,11 +219,15 @@ class DatabaseSeeder extends Seeder
                 $add($u, $menu, $pick($slots), $keys, $status);
             }
         }
-        $mon = $menus[$monday->toDateString()][0];
-        $tue = $menus[$monday->copy()->addDay()->toDateString()][0];
-        $awaMon = $add($awa, $mon, '12:00', ['d1', 'd7', 'd12', 'd16'], 'served', '481516');
-        $yaoMon = $add($yao, $mon, '11:30', ['d9', 'd16'], 'served');
-        $yaoTue = $add($yao, $tue, '11:30', ['d4', 'd12'], 'paid', '204863');
+        // $mon = dernier jour servi, $tue = prochain jour de service
+        [$mon, $planL] = $menus[$lastPastDate];
+        [$tue, $planN] = $menus[$nextOpenDate];
+        $dishName = fn ($k) => Dish::find($this->dish[$k])->name;
+        $awaMain = $planL['plat'][0];
+        $awaMon = $add($awa, $mon, '12:00', [$planL['entree'][0], $awaMain, $planL['dessert'][0], $planL['boisson'][0]], 'served', '481516');
+        $yaoMon = $add($yao, $mon, '11:30', [$planL['plat'][1] ?? $awaMain, $planL['boisson'][0]], 'served');
+        $yaoMain = $planN['plat'][0];
+        $yaoTue = $add($yao, $tue, '11:30', [$yaoMain, $planN['dessert'][0]], 'paid', '204863');
         foreach (array_chunk($resRows, 300) as $chunk) {
             foreach ($chunk as &$r) {
                 $r['allergy_conflict'] = $r['allergy_conflict'] ? json_encode($r['allergy_conflict']) : null;
@@ -224,32 +239,33 @@ class DatabaseSeeder extends Seeder
         }
 
         // Cas de démo : un élève allergique à l'arachide a réservé le riz sauce arachide aujourd'hui
-        $risk = Reservation::with('user', 'menu')->whereHas('menu', fn ($q) => $q->whereDate('date', $today))
+        $risk = Reservation::with('user', 'menu')->where('menu_id', $tue->id)
             ->whereHas('items', fn ($q) => $q->where('dish_id', $this->dish['d5']))->whereHas('user', fn ($q) => $q->where('account_type', 'eleve')->whereNotNull('class_name'))->first();
         if ($risk) {
             $risk->user->forceFill(['allergies' => ['arachide']])->save();
             $risk->update(['allergy_conflict' => [['dish_id' => $this->dish['d5'], 'name' => 'Riz sauce arachide, poulet', 'allergens' => ['arachide']]]]);
             foreach (User::whereIn('role', ['admin', 'super_admin'])->get() as $adm) {
                 $n = $adm->inform('Allergie : réservation à risque', "{$risk->user->name} ({$risk->user->groupLabel()}) a réservé « Riz sauce arachide, poulet », qui contient : arachide, allergène déclaré dans son profil. ".$risk->menu->label('l j M').', créneau '.$risk->slotLabel().'.', '/admin/alertes', 'allergy', 'alert', $risk->id);
-                $n->forceFill(['created_at' => $today->copy()->setTime(8, 12)])->save();
+                $n->forceFill(['created_at' => now()->subMinutes(40)])->save();
             }
         }
 
         // ---------- Transactions et paiements ----------
         $wave = null;
         $tx = fn ($u, $d, $type, $label, $amount, $ref = null) => Transaction::create(['user_id' => $u->id, 'type' => $type, 'label' => $label, 'amount' => $amount, 'reference' => $ref])->forceFill(['created_at' => Carbon::parse($d)->setTime(12, 0)])->save();
-        $tx($awa, '2026-11-02', 'topup', 'Recharge Wave (par Ibrahim Koné)', 10000, 'WV-88213');
-        $tx($awa, '2026-11-03', 'meal', 'Repas — Attiéké poisson braisé', -1700);
-        $tx($awa, '2026-11-05', 'meal', 'Repas — Alloco, poulet braisé', -1400);
-        $tx($awa, '2026-11-10', 'meal', 'Repas — Poulet DG', -1700);
-        $tx($awa, '2026-11-12', 'refund', 'Annulation — Spaghetti bolognaise', 1200);
-        $tx($awa, '2026-11-16', 'topup', 'Recharge Orange Money', 2500, 'OM-55102');
-        $tx($awa, '2026-11-18', 'meal', 'Repas — Riz gras aux légumes', -1100);
-        $tx($awa, $monday->toDateString(), 'meal', 'Repas — Alloco, poulet braisé', -2000);
-        $tx($yao, '2026-11-09', 'topup', 'Recharge Wave (par Ibrahim Koné)', 5000, 'WV-80044');
-        $tx($yao, $monday->toDateString(), 'meal', 'Repas — Riz gras aux légumes', -1100);
-        $tx($yao, $today->toDateString(), 'meal', 'Repas — Attiéké poisson braisé', -1800);
-        $tx($jm, '2026-11-02', 'topup', 'Recharge Wave', 10000, 'WV-87001');
+        $ago = fn (int $days) => Carbon::parse($lastPastDate)->subDays($days)->toDateString();
+        $tx($awa, $ago(21), 'topup', 'Recharge Wave (par Ibrahim Koné)', 10000, 'WV-88213');
+        $tx($awa, $ago(20), 'meal', 'Repas — Attiéké poisson braisé', -1700);
+        $tx($awa, $ago(18), 'meal', 'Repas — Alloco, poulet braisé', -1400);
+        $tx($awa, $ago(13), 'meal', 'Repas — Poulet DG', -1700);
+        $tx($awa, $ago(11), 'refund', 'Annulation — Spaghetti bolognaise', 1200);
+        $tx($awa, $ago(7), 'topup', 'Recharge Orange Money', 2500, 'OM-55102');
+        $tx($awa, $ago(5), 'meal', 'Repas — Riz gras aux légumes', -1100);
+        $tx($awa, $lastPastDate, 'meal', 'Repas — '.$dishName($awaMain), -2000);
+        $tx($yao, $ago(14), 'topup', 'Recharge Wave (par Ibrahim Koné)', 5000, 'WV-80044');
+        $tx($yao, $lastPastDate, 'meal', 'Repas — '.$dishName($planL['plat'][1] ?? $awaMain), -1100);
+        $tx($yao, min($nextOpenDate, $today->toDateString()), 'meal', 'Repas — '.$dishName($yaoMain), -1800);
+        $tx($jm, $ago(21), 'topup', 'Recharge Wave', 10000, 'WV-87001');
 
         // ---------- Moyens de paiement (clés de démonstration chiffrées) ----------
         $providers = [
@@ -276,7 +292,7 @@ class DatabaseSeeder extends Seeder
             }
         }
         $om = PaymentMethod::where('code', 'om')->first();
-        foreach ([[$awa, '2026-11-02', 10000, $wave, 'WV-88213'], [$yao, '2026-11-09', 5000, $wave, 'WV-80044'], [$awa, '2026-10-19', 10000, $om, 'OM-41120'], [$yao, '2026-10-19', 5000, $om, 'OM-41121']] as [$child, $d, $amount, $m, $ref]) {
+        foreach ([[$awa, $ago(21), 10000, $wave, 'WV-88213'], [$yao, $ago(14), 5000, $wave, 'WV-80044'], [$awa, $ago(35), 10000, $om, 'OM-41120'], [$yao, $ago(35), 5000, $om, 'OM-41121']] as [$child, $d, $amount, $m, $ref]) {
             Payment::create(['payer_id' => $ibrahim->id, 'beneficiary_id' => $child->id, 'payment_method_id' => $m->id, 'amount' => $amount, 'status' => 'success', 'environment' => 'test', 'provider_reference' => $ref])
                 ->forceFill(['created_at' => Carbon::parse($d)->setTime(9, 0)])->save();
         }
@@ -296,8 +312,9 @@ class DatabaseSeeder extends Seeder
             $mod->apply($review)->save();
         }
         Review::create(['user_id' => $yao->id, 'menu_id' => $mon->id, 'reservation_id' => $yaoMon, 'rating' => 4, 'comment' => 'J’ai bien aimé le riz gras.', 'tags' => ['Délicieux'], 'status' => 'visible']);
-        foreach ([['d7', 5, 'Poulet bien braisé, l’alloco était croustillant.'], ['d7', 4, ''], ['d9', 3, 'Un peu fade, il manquait du sel.'], ['d12', 5, 'Fruits très frais.'], ['d1', 4, '']] as $k => [$dk, $stars, $comment]) {
-            $r = $monServed->first(fn ($x, $i) => $i > 40 + $k * 7) ?? $monServed[$k];
+        $p2 = $planL['plat'][1] ?? $awaMain;
+        foreach ([[$awaMain, 5, 'Très bon, portion généreuse.'], [$awaMain, 4, ''], [$p2, 3, 'Un peu fade, il manquait du sel.'], [$planL['dessert'][0], 5, 'Très frais.'], [$planL['entree'][0], 4, '']] as $k => [$dk, $stars, $comment]) {
+            $r = $monServed->first(fn ($x, $i) => $i > 40 + $k * 7 && $x->items()->where('dish_id', $this->dish[$dk])->exists()) ?? $monServed[$k];
             Review::create(['user_id' => $r->user_id, 'menu_id' => $mon->id, 'dish_id' => $this->dish[$dk], 'reservation_id' => $r->id, 'rating' => $stars, 'comment' => $comment ?: null, 'status' => 'visible']);
         }
         // Notes historiques sur les plats (semaines passées) pour alimenter moyennes et classement
@@ -318,31 +335,33 @@ class DatabaseSeeder extends Seeder
             AppNotification::create(['user_id' => $u->id, 'icon' => $icon, 'title' => $title, 'body' => $body, 'url' => $url, 'kind' => $kind, 'read_at' => $read ? now() : null])
                 ->forceFill(['created_at' => $at])->save();
         };
-        $note($awa, $today->copy()->setTime(7, 30), 'clock', 'Pensez à réserver', 'Les réservations pour aujourd’hui ferment à 10h00.', '/menu');
-        $note($awa, $monday->copy()->setTime(13, 10), 'star', 'Comment était votre repas ?', 'Notez l’Alloco, poulet braisé de lundi.', '/avis/'.$mon->id, false, 'review');
+        $lastPast = Carbon::parse($lastPastDate);
+        $note($awa, now()->subMinutes(90), 'clock', 'Pensez à réserver', 'Les réservations ferment à 10h00 le jour même.', '/menu');
+        $note($awa, $lastPast->copy()->setTime(13, 10), 'star', 'Comment était votre repas ?', 'Notez '.$dishName($awaMain).' ('.$mon->label('l j').').', '/avis/'.$mon->id, false, 'review');
         $note($awa, $monday->copy()->subDays(2)->setTime(18, 0), 'calendar', 'Menu de la semaine publié', 'Le menu de la semaine est en ligne.', '/menu', true, 'menu');
-        $note($ibrahim, $today->copy()->setTime(8, 5), 'alert', 'Solde bas — Yao', 'Le solde de Yao est de 800 FCFA (seuil : 1 000 FCFA).', '/parent/enfants/'.$yao->id.'/recharger', false, 'low_balance');
-        $note($ibrahim, $today->copy()->setTime(7, 58), 'utensils', 'Repas réservé — Yao', 'Attiéké poisson braisé, créneau 11h30.', '/parent/enfants/'.$yao->id);
-        $note($ibrahim, $monday->copy()->setTime(12, 4), 'check-circle', 'Repas servi — Awa', 'Alloco, poulet braisé servi à 12h04.', '/parent/enfants/'.$awa->id, true, 'served');
+        $note($ibrahim, now()->subMinutes(60), 'alert', 'Solde bas — Yao', 'Le solde de Yao est de 800 FCFA (seuil : 1 000 FCFA).', '/parent/enfants/'.$yao->id.'/recharger', false, 'low_balance');
+        $note($ibrahim, now()->subMinutes(70), 'utensils', 'Repas réservé — Yao', $dishName($yaoMain).', '.$tue->label('l j').', créneau 11h30.', '/parent/enfants/'.$yao->id);
+        $note($ibrahim, $lastPast->copy()->setTime(12, 4), 'check-circle', 'Repas servi — Awa', $dishName($awaMain).' servi à 12h04.', '/parent/enfants/'.$awa->id, true, 'served');
 
         // ---------- Stocks : mouvements ----------
         foreach ([['i1', 'entree', 100, null, 'M. Diallo'], ['i2', 'sortie', 32, 'Production', 'Cuisine'], ['i12', 'perte', 4, 'Fruits abîmés', 'M. Diallo'], ['i4', 'entree', 40, null, 'M. Diallo']] as $k => [$ik, $type, $q, $reason, $who]) {
             StockMovement::create(['ingredient_id' => $this->ing[$ik], 'type' => $type, 'quantity' => $q, 'reason' => $reason, 'author' => $who])
-                ->forceFill(['created_at' => $monday->copy()->subDays($k === 3 ? 3 : 0)->setTime(9, 0)])->save();
+                ->forceFill(['created_at' => $lastPast->copy()->subDays($k === 3 ? 3 : 0)->setTime(9, 0)])->save();
         }
 
         // ---------- Super admin : demandes, corbeille, audit ----------
-        DeletionRequest::create(['user_id' => $others[7]->id, 'reason' => 'Je quitte l’établissement à la fin du mois.', 'status' => 'pending'])->forceFill(['created_at' => '2026-11-20 10:00:00'])->save();
-        DeletionRequest::create(['user_id' => $others[15]->id, 'reason' => null, 'status' => 'pending'])->forceFill(['created_at' => '2026-11-22 10:00:00'])->save();
-        $others[30]->forceFill(['status' => 'trashed', 'trashed_at' => Carbon::parse('2026-10-22 16:05'), 'trash_reason' => 'Départ de l’établissement (demande de l’utilisateur)', 'trashed_by' => 'Kader Touré'])->save();
-        $others[31]->forceFill(['status' => 'trashed', 'trashed_at' => Carbon::parse('2026-11-18 08:47'), 'trash_reason' => 'Compte en double', 'trashed_by' => 'Kader Touré'])->save();
+        $daysAgo = fn (int $d, string $time) => $today->copy()->subDays($d)->setTimeFromTimeString($time);
+        DeletionRequest::create(['user_id' => $others[7]->id, 'reason' => 'Je quitte l’établissement à la fin du mois.', 'status' => 'pending'])->forceFill(['created_at' => $daysAgo(4, '10:00')])->save();
+        DeletionRequest::create(['user_id' => $others[15]->id, 'reason' => null, 'status' => 'pending'])->forceFill(['created_at' => $daysAgo(1, '10:00')])->save();
+        $others[30]->forceFill(['status' => 'trashed', 'trashed_at' => $daysAgo(29, '16:05'), 'trash_reason' => 'Départ de l’établissement (demande de l’utilisateur)', 'trashed_by' => 'Kader Touré'])->save();
+        $others[31]->forceFill(['status' => 'trashed', 'trashed_at' => $daysAgo(6, '08:47'), 'trash_reason' => 'Compte en double', 'trashed_by' => 'Kader Touré'])->save();
         foreach ([
-            ['2026-10-22 16:05', 'trash', $others[30]->name, 'Motif : Départ de l’établissement (demande de l’utilisateur)'],
-            ['2026-11-12 09:12', 'api_keys', 'Wave (Production)', 'Clé secrète remplacée'],
-            ['2026-11-14 11:30', 'role_change', 'Hervé Konan', 'Rôle : Utilisateur → Administrateur'],
-            ['2026-11-18 08:47', 'trash', $others[31]->name, 'Motif : Compte en double'],
+            [$daysAgo(29, '16:05'), 'trash', $others[30]->name, 'Motif : Départ de l’établissement (demande de l’utilisateur)'],
+            [$daysAgo(12, '09:12'), 'api_keys', 'Wave (Production)', 'Clé secrète remplacée'],
+            [$daysAgo(10, '11:30'), 'role_change', 'Hervé Konan', 'Rôle : Utilisateur → Administrateur'],
+            [$daysAgo(6, '08:47'), 'trash', $others[31]->name, 'Motif : Compte en double'],
         ] as [$at, $action, $target, $detail]) {
-            AuditLog::create(['actor_id' => $kader->id, 'actor_name' => $kader->name, 'actor_role' => 'super_admin', 'action' => $action, 'target_label' => $target, 'details' => $detail, 'ip' => '127.0.0.1', 'created_at' => Carbon::parse($at)]);
+            AuditLog::create(['actor_id' => $kader->id, 'actor_name' => $kader->name, 'actor_role' => 'super_admin', 'action' => $action, 'target_label' => $target, 'details' => $detail, 'ip' => '127.0.0.1', 'created_at' => $at]);
         }
     }
 }

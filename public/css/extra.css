@@ -4,8 +4,6 @@ body.no-demo .public-header { top: 0; }
 body.no-demo .sidebar { top: 0; height: 100vh; }
 body.no-demo .admin, body.no-demo .kiosk, body.no-demo .mobile-stage { min-height: 100vh; }
 body.no-demo .phone { max-height: calc(100vh - 48px); }
-.demo-bar form { margin: 0; }
-.demo-bar button svg.ic { width: 14px; height: 14px; vertical-align: -2px; }
 form.inline { display: inline; }
 a.dish-row { text-decoration: none; }
 .qr-box [data-qr] { display: flex; justify-content: center; margin: 0 auto; }

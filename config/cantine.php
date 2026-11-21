@@ -5,8 +5,6 @@ return [
     'trash_days' => (int) env('CANTINE_TRASH_DAYS', 30),
     'payment_env' => env('PAYMENT_ENV', 'test'),
     'upload_max_kb' => (int) env('UPLOAD_MAX_KB', 5120),
-    'demo' => (bool) env('CANTINE_DEMO', false),
-    'demo_now' => env('CANTINE_DEMO_NOW'),
 
     'allergens' => [
         'arachide' => 'Arachide', 'gluten' => 'Gluten', 'lactose' => 'Lactose',

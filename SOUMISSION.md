@@ -22,4 +22,4 @@ Soumission : 21/11/2026 à 18h00.
 php artisan migrate:fresh --seed    # remet les données de démonstration à zéro
 php artisan serve
 ```
-Barre de démo : heure **09:40** pour réserver, **12:10** pour le comptoir.
+L'application suit l'heure réelle : les réservations du jour ferment à 10h00, les jours suivants restent réservables.

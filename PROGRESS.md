@@ -20,7 +20,7 @@ Ordre réel : les étapes 11 à 13 (exigences minimum côté administration) ont
 - Paiements (pilote `SimulatedGateway`, aucun débit réel).
 - E-mails, SMS, e-mail d'activation des administrateurs (notifications internes uniquement).
 - Export PDF = impression du navigateur.
-- Horloge de démonstration figée au mardi 24/11/2026 (`CANTINE_DEMO_NOW`).
+- Barre et horloge de démonstration retirées : l'application utilise l'heure réelle (fuseau Africa/Abidjan) ; les données de démonstration suivent la date du jour.
 
 ## Prévu (non fait)
 - Pilotes de paiement réels, notifications push et SMS.
