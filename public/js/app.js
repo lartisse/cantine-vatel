@@ -83,7 +83,7 @@
   // ---------- Sauvegarde hors ligne des QR (localStorage) ----------
   App.saveOffline = (key, data) => { try { localStorage.setItem('cv:' + key, JSON.stringify(data)); } catch (e) { /* mode privé */ } };
 
-  // ---------- Carrousels : <div data-carousel data-interval="5"> [data-track] [data-slide] [data-prev] [data-next] [data-dots] ----------
+  // ---------- Carrousels : <div data-carousel data-interval="5"> [data-track] [data-slide] [data-dots] ----------
   // Défilement automatique toutes les N secondes (0 = désactivé), en boucle ; pause au survol, au toucher, au focus
   // et quand l'onglet est masqué ; flèches, points cliquables et balayage tactile natif.
   App.carousel = (root) => {
@@ -128,9 +128,39 @@
     const pause = () => { paused = true; clearTimeout(resumeTimer); stop(); root.classList.add('is-paused'); restartProgress(); };
     const resume = (after = 0) => { clearTimeout(resumeTimer); resumeTimer = setTimeout(() => { paused = false; root.classList.remove('is-paused'); start(); }, after); };
 
-    root.querySelector('[data-next]')?.addEventListener('click', () => { next(); start(); });
-    root.querySelector('[data-prev]')?.addEventListener('click', () => { prev(); start(); });
     dots.forEach((d, k) => d.addEventListener('click', () => { go(k); start(); }));
+
+    // Glisser à la souris (le doigt utilise le défilement tactile natif), puis aimantation sur la carte la plus proche
+    let drag = null, moved = false;
+    track.addEventListener('pointerdown', (e) => {
+      if (e.pointerType !== 'mouse' || e.button !== 0) return;
+      drag = { x: e.clientX, left: track.scrollLeft, from: current() };
+      moved = false;
+      pause();
+    });
+    window.addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      const dx = e.clientX - drag.x;
+      if (!moved && Math.abs(dx) > 5) { moved = true; root.classList.add('is-dragging'); }
+      if (moved) { e.preventDefault(); track.scrollLeft = drag.left - dx; }
+    });
+    window.addEventListener('pointerup', (e) => {
+      if (!drag) return;
+      const dx = e.clientX - drag.x;
+      const from = drag.from;
+      drag = null;
+      root.classList.remove('is-dragging');
+      if (moved) {
+        // Geste franc (> 40 px) : carte voisine dans le sens du geste ; sinon carte la plus proche
+        let target = dx < -40 ? from + 1 : dx > 40 ? from - 1 : current();
+        target = Math.max(0, Math.min(slides.length - 1, target));
+        go(target);
+      }
+      if (!root.matches(':hover')) resume(0);
+    });
+    // Après un glissement, on n'ouvre pas le lien « Réserver ce plat » sous la souris
+    track.addEventListener('click', (e) => { if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
+    track.addEventListener('dragstart', (e) => e.preventDefault());
     let raf = null;
     track.addEventListener('scroll', () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { paint(); restartProgress(); }); }, { passive: true });
     root.addEventListener('mouseenter', pause);

@@ -24,7 +24,7 @@
 <div class="grid-2">
     <div class="card">
         <div class="row between"><h3>Réservés et servis par jour</h3><span class="xs muted">{{ $days }} derniers jours</span></div>
-        <canvas id="ch-days" height="110"></canvas>
+        <div class="chart-box"><canvas id="ch-days"></canvas></div>
     </div>
     <div class="card">
         <h3>{!! ic('leaf') !!} Prévision anti-gaspi</h3>
@@ -56,7 +56,7 @@
         <a class="small" href="{{ route('admin.classes') }}">Statistiques par classe ›</a>
     </div>
     <div class="card"><h3>Gaspillage</h3>
-        <canvas id="ch-waste" height="150"></canvas>
+        <div class="chart-box sm"><canvas id="ch-waste"></canvas></div>
         <p class="small muted mt">{{ $totalMissed }} repas non retirés sur {{ $totalDone }} ({{ $totalDone ? round($totalMissed / $totalDone * 100, 1) : 0 }} %)</p>
     </div>
 </div>
@@ -74,6 +74,7 @@
 <script src="{{ asset('vendor/chart.umd.js') }}"></script>
 <script>
 const H = @json($history);
+Chart.defaults.maintainAspectRatio = false;
 new Chart(document.getElementById('ch-days'), { type: 'bar', data: { labels: H.map(h => h.label), datasets: [{ label: 'Réservés', data: H.map(h => h.reserved), backgroundColor: '#87c1e9', borderRadius: 4 }, { label: 'Servis', data: H.map(h => h.served), backgroundColor: '#1d1d1b', borderRadius: 4 }] }, options: { plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } } });
 new Chart(document.getElementById('ch-waste'), { type: 'doughnut', data: { labels: ['Servis', 'Non retirés'], datasets: [{ data: [{{ $history->sum('served') }}, {{ $totalMissed }}], backgroundColor: ['#1e8e5a', '#c46a00'] }] }, options: { plugins: { legend: { position: 'bottom' } } } });
 </script>

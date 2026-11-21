@@ -25,7 +25,7 @@
             </div>
             <form method="POST" action="{{ route('admin.counter.scan') }}" id="scan-form" class="mt">@csrf
                 <label class="small" style="color:#aaa">Code à 6 chiffres</label>
-                <div class="row mt"><input class="code-input grow" name="code" id="code" inputmode="numeric" autocomplete="off" maxlength="64" placeholder="000000" autofocus><button class="btn sky">Valider le code</button></div>
+                <div class="row mt counter-code"><input class="code-input grow" name="code" id="code" inputmode="numeric" autocomplete="off" maxlength="64" placeholder="000000" autofocus><button class="btn sky">Valider le code</button></div>
             </form>
             <div class="recent mt">
                 <b class="small" style="color:#aaa">Derniers servis</b>

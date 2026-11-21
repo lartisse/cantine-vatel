@@ -110,3 +110,51 @@ a.day.active, a.day.active b { color: #fff; }
   .kpis { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 480px) { .kpis { grid-template-columns: 1fr; } .page-head h1 { font-size: 22px; } }
+/* Carrousel glissable : curseur « main », pas d'aimantation ni de sélection de texte pendant le glissement */
+.sugg-scroll { cursor: grab; user-select: none; -webkit-user-select: none; touch-action: pan-x pan-y; }
+.sugg-scroll img { -webkit-user-drag: none; pointer-events: none; }
+.is-dragging .sugg-scroll { cursor: grabbing; scroll-snap-type: none; scroll-behavior: auto; }
+.is-dragging .sugg-card { pointer-events: none; }
+.sugg-nav { margin-top: 8px; }
+/* ---------- Administration, super admin et comptoir : petits écrans ---------- */
+.page-head .row { flex-wrap: wrap; }
+.table-wrap { -webkit-overflow-scrolling: touch; }
+.table-wrap .tbl { min-width: 560px; }
+@media (max-width: 860px) {
+  .sidebar .brand small { display: none; }
+  .sidebar .me .xs { display: none; }
+  .grid-2 { grid-template-columns: minmax(0, 1fr); }
+  .planner { grid-template-columns: minmax(0, 1fr); }
+  .catalog { max-height: 360px; }
+  .toolbar .input { min-width: 0; flex: 1 1 160px; }
+  .prov-grid { grid-template-columns: 1fr; }
+  .modal { padding: 18px; }
+  /* Comptoir */
+  .kiosk-head { flex-wrap: wrap; gap: 10px; padding: 12px 16px; }
+  .kiosk-head .counter { font-size: 18px; text-align: right; }
+  .kiosk-body { padding: 16px; gap: 16px; }
+  .scan-zone { padding: 16px; }
+  .result { padding: 18px; }
+  .result h2 { font-size: 18px; }
+  .counter-code { flex-direction: column; align-items: stretch; }
+  .counter-code .code-input { max-width: none; font-size: 26px; letter-spacing: .3em; }
+}
+@media (max-width: 480px) {
+  .kpis { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .kpi { padding: 12px; }
+  .kpi .value { font-size: 22px; }
+  .kpi .label { font-size: 12px; }
+  .impact { grid-template-columns: 1fr 1fr 1fr; }
+  .impact b { font-size: 16px; }
+  .kiosk-head .brand span small { display: none; }
+}
+/* Graphiques : hauteur fixe, largeur fluide (lisibles sur mobile) */
+.chart-box { position: relative; height: 280px; width: 100%; }
+.chart-box.sm { height: 220px; }
+@media (max-width: 480px) { .chart-box { height: 240px; } }
+@media (max-width: 380px) { .impact { grid-template-columns: 1fr; } .impact div { display: flex; justify-content: space-between; align-items: center; text-align: left; } }
+/* Les cartes des grilles ne doivent jamais imposer une largeur minimale (graphiques en barres, tableaux) */
+.grid-2 > *, .grid-3 > *, .grid-2-eq > *, .kpis > * { min-width: 0; }
+@media (max-width: 860px) { .grid-2-eq, .grid-3 { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 380px) { .bars-h .bh { grid-template-columns: 64px 1fr 32px; } }
+@media (max-width: 860px) { .kiosk-body { align-content: start; } }

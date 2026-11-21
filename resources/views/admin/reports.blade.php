@@ -30,7 +30,7 @@
         <div class="kpi"><div class="label">Plats notés</div><div class="value">{{ $dishRatings->count() }}</div></div>
     @endif
 </div>
-<div class="card"><canvas id="ch" height="90"></canvas></div>
+<div class="card"><div class="chart-box"><canvas id="ch"></canvas></div></div>
 <div class="table-wrap card mt"><table class="tbl"><tr><th>Date</th><th class="num">Réservés</th><th class="num">Servis</th><th class="num">Non retirés</th><th class="num">Recettes</th><th class="num">Note</th></tr>
     @foreach ($daily->reverse() as $d)<tr><td>{{ $d['day'] }} {{ $d['date'] }}</td><td class="num">{{ $d['reserved'] }}</td><td class="num">{{ $d['served'] }}</td><td class="num">{{ $d['missed'] }}</td><td class="num">{{ num($d['revenue']) }}</td><td class="num">{{ $d['rating'] ?: '—' }}</td></tr>@endforeach
 </table></div>
@@ -42,6 +42,7 @@
 <script>
 const D = @json($daily->values()), tab = @json($tab);
 const sets = { frequentation: [['Réservés', 'reserved', '#87c1e9'], ['Servis', 'served', '#1d1d1b']], recettes: [['Recettes (FCFA)', 'revenue', '#1e8e5a']], gaspillage: [['Non retirés', 'missed', '#c46a00']], satisfaction: [['Note moyenne', 'rating', '#e3a008']] }[tab];
+Chart.defaults.maintainAspectRatio = false;
 new Chart(document.getElementById('ch'), { type: tab === 'satisfaction' ? 'line' : 'bar', data: { labels: D.map(d => d.day + ' ' + d.date), datasets: sets.map(([l, k, c]) => ({ label: l, data: D.map(d => d[k]), backgroundColor: c, borderColor: c, borderRadius: 4 })) }, options: { plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } } });
 </script>
 @endpush

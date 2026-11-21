@@ -97,11 +97,9 @@
     </div>
     @if (count($suggestion['items']) > 1)
         <div class="sugg-nav">
-            <button type="button" class="sugg-arrow" data-prev aria-label="{{ __('Suggestion précédente') }}">{!! ic('chevron-left') !!}</button>
             <div class="sugg-dots" data-dots>
                 @foreach ($suggestion['items'] as $cat => $s)<button type="button" aria-label="{{ __(config('cantine.categories')[$cat]) }}"><span></span></button>@endforeach
             </div>
-            <button type="button" class="sugg-arrow" data-next aria-label="{{ __('Suggestion suivante') }}">{!! ic('chevron-right') !!}</button>
         </div>
     @endif
     </div>
