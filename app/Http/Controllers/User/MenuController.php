@@ -18,7 +18,8 @@ class MenuController extends Controller
     public function index(Request $request, ReservationService $service)
     {
         $u = $request->user();
-        $week = (int) $request->query('semaine', 0);
+        // Par défaut : la semaine en cours, ou la suivante quand elle est terminée (week-end)
+        $week = $request->has('semaine') ? (int) $request->query('semaine') : (today()->isWeekend() ? 1 : 0);
         $monday = today()->startOfWeek()->addWeeks($week);
         $menus = Menu::whereBetween('date', [$monday, $monday->copy()->addDays(4)])->where('is_published', true)->orderBy('date')->get();
         $dayParam = $request->query('jour');

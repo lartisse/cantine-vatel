@@ -3,7 +3,46 @@ body.no-demo #app { padding-top: 0; }
 body.no-demo .public-header { top: 0; }
 body.no-demo .sidebar { top: 0; height: 100vh; }
 body.no-demo .admin, body.no-demo .kiosk, body.no-demo .mobile-stage { min-height: 100vh; }
-body.no-demo .phone { max-height: calc(100vh - 48px); }
+
+/* ---------- Espaces élève / personnel / parent : plein écran responsive (sans cadre de téléphone) ---------- */
+.app-shell { min-height: 100vh; background: var(--bg); }
+.app-main { min-height: 100vh; display: flex; flex-direction: column; }
+.app-shell .phone-top { position: sticky; top: 0; z-index: 30; padding: 14px 16px; }
+.app-shell .phone-body { flex: 1; overflow: visible; padding: 16px 16px 92px; }
+.app-shell .no-tabs .phone-body { padding-bottom: 24px; }
+.page-inner { width: 100%; max-width: 1080px; margin: 0 auto; }
+.app-shell .sticky-cta { bottom: 64px; margin-left: -4px; margin-right: -4px; padding-left: 4px; padding-right: 4px; }
+.app-shell .no-tabs .sticky-cta { bottom: 0; }
+/* Mobile : barre d'onglets fixée en bas */
+.app-shell .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; padding-bottom: calc(8px + env(safe-area-inset-bottom)); box-shadow: 0 -4px 14px rgba(16, 24, 40, .05); }
+.app-shell:has(.no-tabs) .tabbar { display: none; }
+.tab-brand, .tab-logout { display: none !important; }
+/* Tablette et ordinateur : menu latéral, contenu sur toute la largeur */
+@media (min-width: 900px) {
+  .app-shell { display: grid; grid-template-columns: 240px 1fr; }
+  .app-shell .tabbar, .app-shell:has(.no-tabs) .tabbar {
+    position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 4px;
+    border-top: 0; border-right: 1px solid var(--line); padding: 18px 12px; box-shadow: none;
+  }
+  .app-shell .tabbar a { flex-direction: row; justify-content: flex-start; gap: 12px; padding: 11px 14px; border-radius: 10px; font-size: 15px; }
+  .app-shell .tabbar a .ti { position: relative; }
+  .app-shell .tabbar a.active { background: var(--sky-50); color: var(--ink); }
+  .app-shell .tabbar a:hover { background: #f4f6f9; }
+  .tab-brand { display: flex !important; align-items: center; gap: 10px; padding: 0 8px 18px !important; margin-bottom: 6px; border-bottom: 1px solid var(--line); border-radius: 0 !important; color: var(--ink) !important; font-weight: 800; font-size: 14px !important; background: none !important; }
+  .tab-brand img { height: 36px; }
+  .tab-brand small { display: block; font-weight: 500; color: var(--muted); font-size: 12px; }
+  .tab-logout { display: block !important; margin-top: auto; }
+  .tab-logout button { width: 100%; display: flex; align-items: center; gap: 12px; border: 0; background: none; padding: 11px 14px; border-radius: 10px; color: var(--muted); font-weight: 600; cursor: pointer; }
+  .tab-logout button:hover { background: var(--red-50); color: var(--red); }
+  .app-shell .phone-top { padding: 18px 32px; }
+  .app-shell .phone-top h2 { font-size: 22px; }
+  .app-shell .phone-body, .app-shell .no-tabs .phone-body { padding: 24px 32px 40px; }
+  .app-shell .sticky-cta, .app-shell .no-tabs .sticky-cta { bottom: 0; }
+  /* Listes de plats et cartes sur plusieurs colonnes */
+  .page-inner .stack:has(> .dish-row), .page-inner .stack:has(> .child-card) { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 12px; }
+  .page-inner .stack:has(> .dish-row) > * + *, .page-inner .stack:has(> .child-card) > * + * { margin-top: 0; }
+  .page-inner .hscroll { flex-wrap: wrap; overflow: visible; }
+}
 form.inline { display: inline; }
 a.dish-row { text-decoration: none; }
 .qr-box [data-qr] { display: flex; justify-content: center; margin: 0 auto; }

@@ -11,7 +11,11 @@
     $refund = $existing?->total ?? 0;
 @endphp
 @if (! $menu->isOpen())
-    <div class="empty"><div class="ico">{!! ic('clock') !!}</div><b>{{ __('Réservations closes') }}</b><p class="small">{{ __('Les réservations pour :d ont fermé à :h.', ['d' => mb_strtolower($menu->label()), 'h' => $cutoff]) }}</p></div>
+    @if (! $menu->is_published)
+        <div class="empty"><div class="ico">{!! ic('calendar') !!}</div><b>{{ __('Menu pas encore publié') }}</b><p class="small">{{ __('Le menu de cette semaine n’est pas encore publié.') }}</p></div>
+    @else
+        <div class="empty"><div class="ico">{!! ic('clock') !!}</div><b>{{ __('Réservations closes') }}</b><p class="small">{{ __('Les réservations pour :d ont fermé à :h.', ['d' => mb_strtolower($menu->label()), 'h' => $cutoff]) }}</p></div>
+    @endif
 @elseif ($already)
     <div class="empty"><div class="ico">{!! ic('ticket') !!}</div><b>{{ __('Déjà réservé') }}</b><p class="small">{{ __('Vous avez déjà une réservation ce jour-là. Vous pouvez la modifier pour ajouter des plats.') }}</p><a class="btn mt" href="{{ route('reservations.show', $already) }}">{{ __('Voir ma réservation') }}</a></div>
 @else
