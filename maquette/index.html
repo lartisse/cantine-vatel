@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1d1d1b">
+  <title>Cantine de Vatel</title>
+  <link rel="icon" href="img/vatel_logo.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Barre de démonstration : changer de rôle et d'heure (à retirer en production) -->
+  <div class="demo-bar" id="demo-bar"></div>
+
+  <!-- Conteneur de l'application : chaque écran est rendu ici par le routeur (js/core.js) -->
+  <div id="app"></div>
+
+  <noscript>Cette maquette nécessite JavaScript.</noscript>
+
+  <script src="js/data.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/icons.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/screens-user.js"></script>
+  <script src="js/screens-admin.js"></script>
+  <script src="js/screens-super.js"></script>
+  <script>App.start();</script>
+</body>
+</html>
