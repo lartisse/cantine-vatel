@@ -152,6 +152,13 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('super')->name('super.')
     Route::put('/parametres', [Super\SettingsController::class, 'update'])->name('settings.update');
     Route::put('/parametres/smtp', [Super\SettingsController::class, 'smtp'])->name('settings.smtp');
     Route::post('/parametres/smtp/test', [Super\SettingsController::class, 'smtpTest'])->middleware('throttle:5,1')->name('settings.smtp.test');
+    Route::get('/api', [Super\ApiKeyController::class, 'index'])->name('api');
+    Route::post('/api', [Super\ApiKeyController::class, 'store'])->name('api.store');
+    Route::put('/api/{apiKey}', [Super\ApiKeyController::class, 'update'])->name('api.update');
+    Route::post('/api/{apiKey}/statut', [Super\ApiKeyController::class, 'toggle'])->name('api.toggle');
+    Route::post('/api/{apiKey}/renouveler', [Super\ApiKeyController::class, 'rotate'])->name('api.rotate');
+    Route::post('/api/{apiKey}/revoquer', [Super\ApiKeyController::class, 'revoke'])->name('api.revoke');
+    Route::delete('/api/{apiKey}', [Super\ApiKeyController::class, 'destroy'])->name('api.destroy');
     Route::get('/audit', [Super\AuditController::class, 'index'])->name('audit');
     Route::get('/audit/export', [Super\AuditController::class, 'export'])->name('audit.export');
 });

@@ -195,3 +195,5 @@ a.day.active, a.day.active b { color: #fff; }
 .sheet-grid a.active { background: var(--sky-50); outline: 2px solid var(--sky); }
 .btn-pair form .btn { width: 100%; }
 @media (min-width: 861px) { #m-admin-more { display: none !important; } }
+/* Documentation de l'API */
+.api-code { background: var(--ink); color: #e6edf3; border-radius: 10px; padding: 12px 14px; font-size: 12.5px; overflow-x: auto; white-space: pre; margin: 8px 0 0; }

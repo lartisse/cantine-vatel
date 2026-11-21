@@ -225,18 +225,29 @@ Voir [Démarrage rapide](#1-démarrage-rapide) et, pour un serveur, [`docs/DEPLO
 php artisan test
 ```
 
-21 tests Feature (`tests/Feature/CantineRulesTest.php`) : accès par rôle, 403 super admin, heure limite, remboursement, capacité des créneaux, confirmation et alerte allergène, comptoir, corbeille et anonymisation, chiffrement et masquage des clés, activation conditionnelle, modération, upload d'image, liaison parent à usage unique, isolation des réservations, réponse de toutes les pages principales.
+32 tests Feature :
+- `tests/Feature/CantineRulesTest.php` : accès par rôle, 403 super admin, heure limite, remboursement, capacité des créneaux, confirmation et alerte allergène, comptoir, corbeille et anonymisation, chiffrement et masquage des clés, activation conditionnelle, modération, upload d'image, liaison parent à usage unique, isolation des réservations, carrousel, SMTP, réponse de toutes les pages principales.
+- `tests/Feature/ApiTest.php` : clé obligatoire, clé hachée, permissions (403), clé révoquée/suspendue/expirée (401), limite de requêtes (429), lectures, service au comptoir, recharge idempotente, gestion des clés par le super admin.
+
+### API pour les applications et services partenaires
+
+API REST v1 en JSON (`/api/v1`), authentifiée par **clé d'API** créée et gérée par le super administrateur dans **Super admin › Clés d'API** (`/super/api`) :
+- une clé par application ou service, avec ses **permissions** (`menus:read`, `reservations:read`, `orders:read`, `orders:write`, `stats:read`, `stocks:read`, `users:read`, `wallet:write`), une **limite de requêtes par minute** et une **date d'expiration** facultative ;
+- la clé complète n'est affichée **qu'une fois** à sa création, puis stockée hachée (SHA-256) ; suivi du dernier appel (date, IP) et du nombre de requêtes ;
+- suspendre, réactiver, **renouveler** (nouvelle clé, ancienne révoquée), révoquer, supprimer — ressaisie du mot de passe pour créer ou renouveler, tout est tracé dans le journal d'audit.
+
+Points d'accès : menus, plats, réservations, commandes du jour et prévision, service au comptoir, statistiques, stocks, comptes, recharge de solde (idempotente). Documentation complète : [`docs/API.md`](docs/API.md).
 
 ## 13. Structure du dépôt
 
 ```
 cantine-vatel/
 ├── README.md, CHANGELOG.md, PROGRESS.md, SOUMISSION.md
-├── docs/            ARCHITECTURE.md, ECRANS.md, DEPLOIEMENT.md, captures/
+├── docs/            ARCHITECTURE.md, ECRANS.md, DEPLOIEMENT.md, API.md, captures/
 ├── maquette/        Maquette interactive HTML/CSS/JS (référence visuelle)
 ├── app/
-│   ├── Http/Controllers/{User,ParentArea,Admin,Super}/ + Auth, Common, Demo
-│   ├── Http/Middleware/   EnsureRole, EnsureAccountActive, SetLocale, DemoClock
+│   ├── Http/Controllers/{User,ParentArea,Admin,Super,Api}/ + Auth, Common
+│   ├── Http/Middleware/   EnsureRole, EnsureAccountActive, SetLocale, AuthenticateApiKey
 │   ├── Models/            19 tables + StockMovement
 │   ├── Policies/          ReservationPolicy
 │   ├── Services/          Reservation, Account, Image, Moderation, Suggestion, AuditLogger
@@ -246,7 +257,7 @@ cantine-vatel/
 ├── lang/en.json
 ├── public/  css/app.css (maquette), css/extra.css, js/app.js, vendor/, sw.js, manifest.webmanifest
 ├── resources/views/{layouts,components,partials,auth,common,user,parent,admin,super}
-└── routes/web.php, routes/console.php (purge planifiée)
+└── routes/web.php, routes/api.php (API v1), routes/console.php (purge planifiée)
 ```
 
 ## 14. Ce qui est simulé, ce qui est prévu

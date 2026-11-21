@@ -4,6 +4,8 @@ Toutes les évolutions notables du projet. Format : [Keep a Changelog](https://k
 
 ## [Non publié]
 ### Ajouté
+- API REST v1 (`/api/v1`) pour les applications et services partenaires : menus, plats, réservations, commandes, service au comptoir, statistiques, stocks, comptes, recharge idempotente. Documentation `docs/API.md`.
+- Écran Super admin › Clés d'API : création (clé affichée une seule fois, stockée hachée), permissions par clé, limite par minute, expiration, suspension, renouvellement, révocation, suivi d'utilisation, journal d'audit.
 - Configuration SMTP dans « Paramètres de l'application » (super admin) : mot de passe chiffré et masqué, ressaisie du mot de passe, e-mail de test, journal d'audit ; prioritaire sur `MAIL_*` du `.env` une fois activée.
 - Suggestions : un plat par catégorie dans un carrousel interactif (flèches, points, balayage, clavier) à défilement automatique ; délai réglable par le super administrateur (5 s par défaut).
 - Espaces élève/personnel/parent en plein écran responsive ; administration utilisable sur mobile.

@@ -10,7 +10,7 @@
 <div class="table-wrap card"><table class="tbl">
     <tr><th>Quand</th><th>Qui</th><th>Action</th><th>Cible</th><th>Détail</th><th>IP</th></tr>
     @forelse ($logs as $l)
-        @php $red = in_array($l->action, ['trash', 'delete', 'purge', 'admin_disable', 'dish_delete'], true); $orange = in_array($l->action, ['api_keys', 'payment_toggle', 'role_change'], true); @endphp
+        @php $red = in_array($l->action, ['trash', 'delete', 'purge', 'admin_disable', 'dish_delete', 'api_key_revoke', 'api_key_delete'], true); $orange = in_array($l->action, ['api_keys', 'payment_toggle', 'role_change', 'api_key_create', 'api_key_rotate', 'api_key_update', 'api_key_suspend', 'api_topup'], true); @endphp
         <tr><td class="small">{{ $l->created_at?->format('d/m · H:i') }}</td><td class="small"><b>{{ $l->actor_name }}</b><br><span class="xs muted">{{ \App\Models\User::ROLE_LABELS[$l->actor_role] ?? $l->actor_role }}</span></td>
             <td><span class="badge {{ $red ? 'red' : ($orange ? 'orange' : '') }}">{{ $labels[$l->action] ?? $l->action }}</span></td><td class="small">{{ $l->target_label }}</td><td class="small">{{ $l->details }}</td><td class="xs muted">{{ $l->ip }}</td></tr>
     @empty
