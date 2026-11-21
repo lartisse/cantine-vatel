@@ -4,8 +4,8 @@ Soumission : 21/11/2026 à 18h00.
 
 | Élément | État | Détail |
 | --- | --- | --- |
-| Dépôt public avec commits réguliers | ⚠ À pousser | 30+ commits locaux (Conventional Commits, un par étape). Commande : `git push -u origin main --tags` |
-| Tags poussés | ⚠ À pousser | v0.1.0, v0.2.0, v0.3.0, v0.4.0, v0.5.0, v1.0.0 (créés localement) |
+| Dépôt public avec commits réguliers | ✅ | https://github.com/lartisse/cantine-vatel — un commit par étape (Conventional Commits) |
+| Tags poussés | ✅ | v0.1.0, v0.2.0, v0.3.0, v0.4.0, v0.5.0, v1.0.0 |
 | URL de démo | ☐ À compléter | `https://…` (voir `docs/DEPLOIEMENT.md`) — à défaut, démo locale `php artisan serve` |
 | README complet | ✅ | `README.md` : installation, comptes, parcours de démo, architecture, sécurité, simulé/prévu |
 | Comptes de test | ✅ | 6 comptes, mot de passe `password`, recréés par `php artisan migrate:fresh --seed` |

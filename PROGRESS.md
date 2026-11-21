@@ -31,4 +31,4 @@ Ordre réel : les étapes 11 à 13 (exigences minimum côté administration) ont
 - Laravel 11 non installable (avis de sécurité Composer sur toute la branche 11.x) → Laravel 12, même API.
 - PHP et Composer absents de la machine : extensions activées dans `C:\php\php.ini` (sauvegarde `php.ini.bak-cantine`), Composer installé dans `~/bin`.
 - Écritures de fichiers intermittentes refusées (antivirus) pendant `composer install` / `npm install` : relancées.
-- **Push GitHub impossible depuis ce terminal** (aucun identifiant GitHub) : tous les commits et tags sont locaux, à pousser avec `git push -u origin main --tags`.
+- Push GitHub impossible depuis le terminal de Claude (pas d’identifiants) : poussé par l’auteur. Dépôt renommé en `lartisse/cantine-vatel` ; commits et tags v0.1.0 à v1.0.0 en ligne.

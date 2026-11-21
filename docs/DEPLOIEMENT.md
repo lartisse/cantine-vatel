@@ -31,7 +31,7 @@ GRANT ALL PRIVILEGES ON cantine_vatel.* TO 'cantine'@'localhost';
 
 ```bash
 cd /var/www
-sudo git clone https://github.com/lartisse/cantile-vatel.git cantine-vatel
+sudo git clone https://github.com/lartisse/cantine-vatel.git cantine-vatel
 sudo chown -R $USER:www-data cantine-vatel && cd cantine-vatel
 composer install --no-dev --optimize-autoloader
 npm ci && npm run build
@@ -129,7 +129,7 @@ php artisan migrate --force && php artisan optimize
 Sur n'importe quel ordinateur avec PHP 8.2 (extensions `gd`, `pdo_sqlite`, `fileinfo`, `intl`, `zip`) et Composer :
 
 ```bash
-git clone https://github.com/lartisse/cantile-vatel.git cantine-vatel && cd cantine-vatel
+git clone https://github.com/lartisse/cantine-vatel.git cantine-vatel && cd cantine-vatel
 composer install
 cp .env.example .env && php artisan key:generate
 # .env : DB_CONNECTION=sqlite, CANTINE_DEMO=true, CANTINE_DEMO_NOW="2026-11-24 09:40"

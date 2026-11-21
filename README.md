@@ -39,7 +39,7 @@ Les élèves et le personnel consultent le menu, réservent leur repas depuis le
 Prérequis : PHP 8.2+ (extensions `gd`, `pdo_sqlite`, `mbstring`, `openssl`, `fileinfo`, `intl`, `zip`), Composer 2, Node.js 20.
 
 ```bash
-git clone https://github.com/lartisse/cantile-vatel.git cantine-vatel && cd cantine-vatel
+git clone https://github.com/lartisse/cantine-vatel.git cantine-vatel && cd cantine-vatel
 composer install && npm install
 cp .env.example .env && php artisan key:generate
 touch database/database.sqlite            # Windows : type nul > database\database.sqlite
