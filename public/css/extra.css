@@ -1,0 +1,30 @@
+/* Ajustements propres à l'application Laravel (complètent css/app.css repris de la maquette) */
+body.no-demo #app { padding-top: 0; }
+body.no-demo .public-header { top: 0; }
+body.no-demo .sidebar { top: 0; height: 100vh; }
+body.no-demo .admin, body.no-demo .kiosk, body.no-demo .mobile-stage { min-height: 100vh; }
+body.no-demo .phone { max-height: calc(100vh - 48px); }
+.demo-bar form { margin: 0; }
+.demo-bar button svg.ic { width: 14px; height: 14px; vertical-align: -2px; }
+form.inline { display: inline; }
+a.dish-row { text-decoration: none; }
+.qr-box [data-qr] { display: flex; justify-content: center; margin: 0 auto; }
+.qr-box [data-qr] img, .qr-box [data-qr] canvas { margin: 0 auto; }
+.check-grid label.check, label.check { user-select: none; }
+.pay-method input, .slot input, .amount-btn input, .choice input { position: absolute; opacity: 0; pointer-events: none; }
+label.slot, label.pay-method, label.amount-btn, label.choice { cursor: pointer; position: relative; }
+.slot:has(input:checked), .amount-btn:has(input:checked) { background: var(--ink); color: #fff; border-color: var(--ink); }
+.slot:has(input:checked) .muted { color: #ddd; }
+.pay-method:has(input:checked) { border-color: var(--ink); background: var(--sky-50); }
+.choice:has(input:checked) { border-color: var(--ink); background: var(--sky-50); }
+.slot:has(input:disabled) { opacity: .45; cursor: not-allowed; }
+.pagination { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+.pagination a, .pagination span { padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; background: #fff; }
+.pagination .active span { background: var(--ink); color: #fff; }
+.err-page { max-width: 480px; margin: 80px auto; text-align: center; padding: 20px; }
+.impact { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.impact div { background: var(--green-50); color: var(--green); border-radius: 12px; padding: 12px; text-align: center; }
+.impact b { display: block; font-size: 22px; }
+.banner-gaspi { background: linear-gradient(135deg, #e7f6ee, #fff3e3); border-radius: var(--radius); padding: 14px; }
+@media print { .no-print { display: none !important; } }
+@media (max-width: 860px) { .impact { grid-template-columns: 1fr; } }

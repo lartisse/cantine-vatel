@@ -1,0 +1,1 @@
+<div class="rate-stars mt"><input type="hidden" name="{{ $name }}" value="">@for ($i = 1; $i <= 5; $i++)<button type="button" data-v="{{ $i }}" aria-label="{{ $i }}/5">{!! ic('star', 'ic-star') !!}</button>@endfor</div>
